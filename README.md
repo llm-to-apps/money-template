@@ -25,6 +25,7 @@ The platform should provide:
 
 ```text
 DATABASE_URL
+APP_PORT=3001
 ```
 
 Useful commands:
@@ -35,4 +36,10 @@ npm run build
 npm run typecheck
 npm run db:deploy
 npm run db:seed
+```
+
+Health endpoint:
+
+```text
+GET /api/health
 ```
