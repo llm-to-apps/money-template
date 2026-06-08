@@ -1,4 +1,6 @@
-ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-f304fcb
+ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-5215a04
+
+FROM ${AGENT_TOOLS_IMAGE} AS agent-tools
 
 FROM node:22-alpine AS deps
 
@@ -17,7 +19,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM ${AGENT_TOOLS_IMAGE} AS runtime
+FROM node:22-alpine AS runtime
+
+RUN apk add --no-cache bash ca-certificates git openssh-client patch
+COPY --from=agent-tools /usr/local/bin/agent-tools /usr/local/bin/agent-tools
 
 WORKDIR /workspace
 
@@ -39,3 +44,5 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.ts ./next.config.ts
 
 EXPOSE 3001 7070
+
+ENTRYPOINT ["agent-tools"]
