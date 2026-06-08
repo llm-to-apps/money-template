@@ -1,3 +1,5 @@
+ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-d39991b
+
 FROM node:22-alpine AS deps
 
 WORKDIR /app
@@ -15,14 +17,19 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:22-alpine AS runtime
+FROM ${AGENT_TOOLS_IMAGE} AS runtime
 
-WORKDIR /app
+RUN apk add --no-cache nodejs npm
+
+WORKDIR /workspace
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3001
 ENV HOSTNAME=0.0.0.0
+ENV AGENT_WORKDIR=/workspace
+ENV AGENT_TOOLS_PORT=7070
+ENV APP_COMMAND="npm run start"
 
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
@@ -33,6 +40,4 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.ts ./next.config.ts
 
-EXPOSE 3001
-
-CMD ["npm", "run", "start"]
+EXPOSE 3001 7070
