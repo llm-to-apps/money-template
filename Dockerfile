@@ -1,4 +1,4 @@
-ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-d39991b
+ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-f304fcb
 
 FROM node:22-alpine AS deps
 
@@ -18,8 +18,6 @@ COPY . .
 RUN npm run build
 
 FROM ${AGENT_TOOLS_IMAGE} AS runtime
-
-RUN apk add --no-cache nodejs npm
 
 WORKDIR /workspace
 
