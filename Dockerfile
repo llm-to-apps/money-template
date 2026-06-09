@@ -1,6 +1,14 @@
-ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-5215a04
+ARG AGENT_TOOLS_REPO=https://github.com/llm-to-apps/agent-tools.git
+ARG AGENT_TOOLS_REF=5215a04a8eedca7b94ccf9b23dda56e626d1864f
 
-FROM ${AGENT_TOOLS_IMAGE} AS agent-tools
+FROM golang:1.22-alpine AS agent-tools
+ARG AGENT_TOOLS_REPO
+ARG AGENT_TOOLS_REF
+WORKDIR /src
+RUN apk add --no-cache git
+RUN git clone "${AGENT_TOOLS_REPO}" . \
+  && git checkout "${AGENT_TOOLS_REF}" \
+  && go build -o /out/agent-tools ./cmd/agent-tools
 
 FROM node:22-alpine AS deps
 
@@ -22,7 +30,7 @@ RUN npm run build
 FROM node:22-alpine AS runtime
 
 RUN apk add --no-cache bash ca-certificates git openssh-client patch
-COPY --from=agent-tools /usr/local/bin/agent-tools /usr/local/bin/agent-tools
+COPY --from=agent-tools /out/agent-tools /usr/local/bin/agent-tools
 
 WORKDIR /workspace
 
