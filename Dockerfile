@@ -37,12 +37,15 @@ ENV APP_COMMAND="npm run start"
 
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
-RUN npm ci --omit=dev
+RUN npm ci
 RUN npm run prisma:generate
 
 COPY --from=builder /app/.next ./.next
+COPY app ./app
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.ts ./next.config.ts
+COPY README.md next-env.d.ts tsconfig.json ./
+COPY .git ./.git
 
 EXPOSE 3001 7070
 
