@@ -1,4 +1,4 @@
-ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-cc655eb
+ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-cbae7cf
 
 FROM ${AGENT_TOOLS_IMAGE} AS agent-tools
 
@@ -32,6 +32,7 @@ ENV PORT=3001
 ENV HOSTNAME=0.0.0.0
 ENV AGENT_WORKDIR=/workspace
 ENV AGENT_TOOLS_PORT=7070
+ENV APP_STARTUP_COMMANDS="npm run db:deploy && npm run db:seed"
 ENV APP_COMMAND="npm run start"
 
 COPY package.json package-lock.json ./
