@@ -35,7 +35,7 @@ RUN npm run prisma:generate
 COPY app ./app
 COPY public ./public
 COPY next.config.ts ./next.config.ts
-COPY README.md next-env.d.ts tsconfig.json ./
+COPY AGENT.md README.md next-env.d.ts tsconfig.json ./
 COPY .git ./.git
 
 EXPOSE 3001 7070
