@@ -18,10 +18,12 @@ The platform agent uses this endpoint in Use mode. If a user-facing data action 
 When adding or changing Prisma models:
 
 - Update `prisma/schema.prisma`.
+- Add a migration SQL file under `prisma/migrations`.
 - Add or update the related application code.
 - Add MCP tools for user-facing business operations around the model.
 - Update seed data only when useful for a fresh demo app.
 - Keep relations explicit and use sensible delete behavior.
+- Do not hide missing required tables or columns with UI fallbacks. Fix the schema, migration, generated Prisma client, and seed path instead.
 
 Examples:
 
@@ -69,7 +71,29 @@ After code changes, run the most relevant checks available in the container.
 
 Prefer:
 
+- `npm run prisma:generate` after Prisma schema changes
 - `npm run typecheck`
 - `npm run build` when the change affects routing or production behavior
 
+After Prisma schema changes:
+
+- Run `npm run prisma:generate`.
+- Run `npm run typecheck`.
+- Restart the supervised app process.
+- Inspect app status and logs.
+- Do not report success if these checks did not complete. Report exactly what failed or could not be run.
+
 After edits that affect the running app, restart the supervised app process and inspect status/logs if needed.
+
+## Generated Files
+
+Do not intentionally edit generated framework files such as `next-env.d.ts`.
+If a tool run changes `next-env.d.ts`, treat it as generated noise and do not present it as a meaningful project change.
+
+## Command Rules
+
+When running commands through agent tools:
+
+- Use the project root by omitting `cwd` or setting `cwd` to `.`.
+- Do not pass absolute paths as `cwd`.
+- If a command fails because of the tool environment, explain that failure plainly and try the same command again with a relative `cwd` when appropriate.
