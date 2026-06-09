@@ -1,10 +1,12 @@
 import { revalidatePath } from 'next/cache';
 import { Wallet } from 'lucide-react';
-import { PrismaClient, TransactionType } from '@prisma/client';
+import { TransactionType } from '@prisma/client';
+
+import { prisma } from './lib/db';
+import { broadcastAppEvent } from './lib/events';
+import { RealtimeRefresh } from './ui/realtime-refresh';
 
 export const dynamic = 'force-dynamic';
-
-const prisma = new PrismaClient();
 
 function formatMoney(cents: number) {
   return new Intl.NumberFormat('en-US', {
@@ -35,6 +37,10 @@ async function addTransaction(formData: FormData) {
     }
   });
 
+  broadcastAppEvent({
+    type: 'money.updated',
+    payload: { action: 'transaction.created' }
+  });
   revalidatePath('/');
 }
 
@@ -61,6 +67,7 @@ export default async function Home() {
 
   return (
     <main className="page">
+      <RealtimeRefresh />
       <header className="header">
         <div className="brand">
           <div className="brand-mark">
