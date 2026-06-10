@@ -24,7 +24,7 @@ ENV PORT=3001
 ENV HOSTNAME=0.0.0.0
 ENV AGENT_WORKDIR=/workspace
 ENV AGENT_TOOLS_PORT=7070
-ENV APP_STARTUP_COMMANDS="npm run db:deploy && npm run db:seed"
+ENV APP_STARTUP_COMMANDS="npm run prisma:generate && npm run db:deploy && npm run db:seed"
 ENV APP_COMMAND="npm run dev"
 
 COPY package.json package-lock.json ./
