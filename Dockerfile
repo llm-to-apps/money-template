@@ -36,7 +36,6 @@ COPY app ./app
 COPY public ./public
 COPY next.config.ts ./next.config.ts
 COPY AGENT.md README.md next-env.d.ts tsconfig.json ./
-COPY .git ./.git
 
 EXPOSE 3001 7070
 
