@@ -20,7 +20,7 @@
       "defaultBranch": "main"
     }
   },
-  "image": "ghcr.io/llm-to-apps/money-template:sha-c1e5163",
+  "image": "ghcr.io/llm-to-apps/money-template:sha-fcc96d8",
   "runtime": {
     "workdir": "/workspace",
     "appPort": 3001,
