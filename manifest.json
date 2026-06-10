@@ -28,6 +28,16 @@
     "startupCommands": "npm run db:deploy && npm run db:seed",
     "appCommand": "npm run dev"
   },
+  "resources": {
+    "memory": {
+      "reservationMb": 128,
+      "limitMb": 1024
+    },
+    "cpu": {
+      "reservation": 0.05,
+      "limit": 1
+    }
+  },
   "services": {
     "mysql": {
       "required": true,
