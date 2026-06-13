@@ -73,6 +73,11 @@ async function getMoneySnapshot(): Promise<MoneySnapshot> {
     },
     transactions: transactions.map((transaction) => ({
       ...transaction,
+      category: {
+        ...transaction.category,
+        createdAt: transaction.category.createdAt.toISOString(),
+        updatedAt: transaction.category.updatedAt.toISOString()
+      },
       createdAt: transaction.createdAt.toISOString(),
       occurredAt: transaction.occurredAt.toISOString(),
       updatedAt: transaction.updatedAt.toISOString()

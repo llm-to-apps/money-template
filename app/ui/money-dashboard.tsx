@@ -274,7 +274,12 @@ export function MoneyDashboard({
 
         <aside className="panel">
           <h2>Add transaction</h2>
-          <form className="form" onSubmit={addTransaction}>
+          <form
+            action="/api/transactions"
+            className="form"
+            method="post"
+            onSubmit={addTransaction}
+          >
             <div className="two">
               <div className="field">
                 <label htmlFor="type">Type</label>

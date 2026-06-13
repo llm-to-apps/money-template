@@ -25,24 +25,26 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   if (!(await getCurrentUser())) {
-    return NextResponse.json({ ok: false, message: 'Unauthorized' }, { status: 401 });
+    return wantsJson(request)
+      ? NextResponse.json({ ok: false, message: 'Unauthorized' }, { status: 401 })
+      : NextResponse.redirect(new URL('/auth/login', request.url), 303);
   }
 
-  const body = (await request.json()) as CreateTransactionRequest;
+  const isJson = wantsJson(request);
+  const body = isJson
+    ? ((await request.json()) as CreateTransactionRequest)
+    : await readFormTransaction(request);
   const type = body.type;
   const categoryId = String(body.categoryId ?? '');
   const amount = Number(body.amount);
   const note = String(body.note || '').trim();
 
   if (type !== TransactionType.INCOME && type !== TransactionType.EXPENSE) {
-    return NextResponse.json({ ok: false, message: 'Invalid type' }, { status: 400 });
+    return invalidTransactionResponse(request, isJson, 'Invalid type');
   }
 
   if (!categoryId || !Number.isFinite(amount) || amount <= 0) {
-    return NextResponse.json(
-      { ok: false, message: 'Enter a valid transaction' },
-      { status: 400 }
-    );
+    return invalidTransactionResponse(request, isJson, 'Enter a valid transaction');
   }
 
   await prisma.transaction.create({
@@ -60,7 +62,30 @@ export async function POST(request: NextRequest) {
     payload: { action: 'transaction.created' }
   });
 
-  return NextResponse.json(await getMoneySnapshot());
+  return isJson
+    ? NextResponse.json(await getMoneySnapshot())
+    : NextResponse.redirect(new URL('/', request.url), 303);
+}
+
+async function readFormTransaction(request: NextRequest): Promise<CreateTransactionRequest> {
+  const formData = await request.formData();
+
+  return {
+    amount: Number(formData.get('amount')),
+    categoryId: String(formData.get('categoryId') ?? ''),
+    note: String(formData.get('note') || ''),
+    type: String(formData.get('type')) as TransactionType
+  };
+}
+
+function invalidTransactionResponse(request: NextRequest, isJson: boolean, message: string) {
+  return isJson
+    ? NextResponse.json({ ok: false, message }, { status: 400 })
+    : NextResponse.redirect(new URL('/', request.url), 303);
+}
+
+function wantsJson(request: NextRequest) {
+  return request.headers.get('content-type')?.includes('application/json') === true;
 }
 
 async function getMoneySnapshot() {
@@ -96,6 +121,11 @@ async function getMoneySnapshot() {
     },
     transactions: transactions.map((transaction) => ({
       ...transaction,
+      category: {
+        ...transaction.category,
+        createdAt: transaction.category.createdAt.toISOString(),
+        updatedAt: transaction.category.updatedAt.toISOString()
+      },
       createdAt: transaction.createdAt.toISOString(),
       occurredAt: transaction.occurredAt.toISOString(),
       updatedAt: transaction.updatedAt.toISOString()
