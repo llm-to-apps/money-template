@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   if (!(await getCurrentUser())) {
     return wantsJson(request)
       ? NextResponse.json({ ok: false, message: 'Unauthorized' }, { status: 401 })
-      : NextResponse.redirect(new URL('/auth/login', request.url), 303);
+      : redirectTo('/auth/login');
   }
 
   const isJson = wantsJson(request);
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
   return isJson
     ? NextResponse.json(await getMoneySnapshot())
-    : NextResponse.redirect(new URL('/', request.url), 303);
+    : redirectTo('/');
 }
 
 async function readFormTransaction(request: NextRequest): Promise<CreateTransactionRequest> {
@@ -81,11 +81,20 @@ async function readFormTransaction(request: NextRequest): Promise<CreateTransact
 function invalidTransactionResponse(request: NextRequest, isJson: boolean, message: string) {
   return isJson
     ? NextResponse.json({ ok: false, message }, { status: 400 })
-    : NextResponse.redirect(new URL('/', request.url), 303);
+    : redirectTo('/');
 }
 
 function wantsJson(request: NextRequest) {
   return request.headers.get('content-type')?.includes('application/json') === true;
+}
+
+function redirectTo(location: string) {
+  return new NextResponse(null, {
+    headers: {
+      Location: location
+    },
+    status: 303
+  });
 }
 
 async function getMoneySnapshot() {
