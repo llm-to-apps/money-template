@@ -262,6 +262,12 @@ button {
   background: #fbfcfa;
 }
 
+.form-error {
+  color: #b42318;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
 .two {
   display: grid;
   grid-template-columns: 1fr 1fr;

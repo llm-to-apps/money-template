@@ -54,6 +54,7 @@ When adding a mutating MCP action or server action:
 - Send a realtime notification after the database write succeeds.
 - Include a concise action name in the payload, such as `wallet.created` or `category.upserted`.
 - Keep the payload small.
+- Use realtime notifications to update focused client state or fetch a small JSON snapshot. Do not refresh or reload the whole route for ordinary data changes.
 
 ## UI Rules
 
@@ -63,7 +64,8 @@ When adding a new model that users manage:
 
 - Add visible UI only when the feature needs direct user interaction.
 - Keep forms compact and clear.
-- Prefer server actions and Prisma queries that match existing patterns.
+- Keep common CRUD interactions smooth: use local state, optimistic updates, or targeted API fetches so forms do not reload the whole view.
+- Avoid `window.location.reload()`, periodic full-page polling, and `router.refresh()` as the default update mechanism for routine mutations. Use them only for rare whole-route state changes and explain why.
 
 ## Verification
 
