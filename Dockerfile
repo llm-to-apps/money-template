@@ -1,4 +1,4 @@
-ARG AGENT_TOOLS_IMAGE=os7-agent-tools:local
+ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-d65e104
 
 FROM ${AGENT_TOOLS_IMAGE} AS agent-tools
 
