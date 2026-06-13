@@ -3,6 +3,11 @@ import { TransactionType } from '@prisma/client';
 
 import { broadcastAppEvent } from '../../lib/events';
 import { prisma } from '../../lib/db';
+import {
+  os7RequestHostHeader,
+  projectId,
+  projectTokenIntrospectionUrl
+} from '../../lib/env';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -82,7 +87,7 @@ const tools = [
 ];
 
 export async function GET(request: NextRequest) {
-  if (!isAuthorized(request)) {
+  if (!(await isAuthorized(request))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -90,7 +95,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAuthorized(request)) {
+  if (!(await isAuthorized(request))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -264,16 +269,49 @@ async function resolveCategoryId(args: Record<string, unknown>) {
   return category.id;
 }
 
-function isAuthorized(request: NextRequest) {
-  const expectedToken = process.env.APP_MCP_TOKEN;
+async function isAuthorized(request: NextRequest) {
+  const token = readBearerToken(request);
 
-  if (!expectedToken) {
-    return process.env.NODE_ENV === 'development';
+  if (!token) {
+    return false;
   }
 
-  const header = request.headers.get('authorization') ?? '';
-  return header === `Bearer ${expectedToken}`;
+  const response = await fetch(projectTokenIntrospectionUrl(), {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${token}`,
+      ...os7RequestHostHeader()
+    }
+  }).catch(() => null);
+
+  if (!response?.ok) {
+    return false;
+  }
+
+  const payload = (await response.json().catch(() => null)) as {
+    active?: boolean;
+    projectId?: string;
+    role?: string;
+  } | null;
+
+  return (
+    payload?.active === true &&
+    payload.projectId === projectId() &&
+    (payload.role === 'admin' || payload.role === 'editor')
+  );
 }
+
+function readBearerToken(request: NextRequest) {
+  const authorization = request.headers.get('authorization') ?? '';
+  const [scheme, token] = authorization.split(/\s+/, 2);
+
+  if (scheme?.toLowerCase() !== 'bearer' || !token) {
+    return null;
+  }
+
+  return token;
+}
+
 
 function jsonRpcResult(id: string | number | null, result: unknown) {
   return NextResponse.json({

@@ -1,9 +1,13 @@
 import { revalidatePath } from 'next/cache';
-import { Wallet } from 'lucide-react';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { CheckCircle2, CircleDashed, Wallet } from 'lucide-react';
 import { TransactionType } from '@prisma/client';
 
+import { getCurrentUser, isManuallyLoggedOut } from './lib/auth';
 import { prisma } from './lib/db';
 import { broadcastAppEvent } from './lib/events';
+import { checkProjectServiceHandshake } from './lib/s2s';
 import { RealtimeRefresh } from './ui/realtime-refresh';
 
 export const dynamic = 'force-dynamic';
@@ -17,6 +21,12 @@ function formatMoney(cents: number) {
 
 async function addTransaction(formData: FormData) {
   'use server';
+
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect('/auth/login');
+  }
 
   const type = String(formData.get('type')) as TransactionType;
   const categoryId = String(formData.get('categoryId'));
@@ -45,7 +55,21 @@ async function addTransaction(formData: FormData) {
 }
 
 export default async function Home() {
-  const [categories, transactions, totals] = await Promise.all([
+  const isEmbedded = isFrameRequest(await headers());
+  const [user, manuallyLoggedOut] = await Promise.all([
+    getCurrentUser(),
+    isManuallyLoggedOut()
+  ]);
+
+  if (!user) {
+    if (manuallyLoggedOut && !isEmbedded) {
+      redirect('/auth/signed-out');
+    }
+
+    redirect('/auth/login');
+  }
+
+  const [categories, transactions, totals, serviceHandshake] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: 'asc' } }),
     prisma.transaction.findMany({
       include: { category: true },
@@ -55,7 +79,8 @@ export default async function Home() {
     prisma.transaction.groupBy({
       by: ['type'],
       _sum: { amountCents: true }
-    })
+    }),
+    checkProjectServiceHandshake()
   ]);
   const income =
     totals.find((item) => item.type === TransactionType.INCOME)?._sum
@@ -64,6 +89,7 @@ export default async function Home() {
     totals.find((item) => item.type === TransactionType.EXPENSE)?._sum
       .amountCents ?? 0;
   const balance = income - expenses;
+  const displayName = user.name;
 
   return (
     <main className="page">
@@ -77,6 +103,19 @@ export default async function Home() {
             <h1>Money</h1>
             <p>Track income, expenses, and monthly cash flow.</p>
           </div>
+        </div>
+        <div className="account">
+          <div className="account-card">
+            <span className="account-name">{displayName}</span>
+            <span className={`account-role role-${user.role}`}>{user.role}</span>
+          </div>
+          {!isEmbedded ? (
+            <form action="/api/auth/logout" method="post">
+              <button className="ghost-button" type="submit">
+                Sign out
+              </button>
+            </form>
+          ) : null}
         </div>
       </header>
 
@@ -178,6 +217,27 @@ export default async function Home() {
           </form>
         </aside>
       </section>
+      <footer className="footer">
+        <span
+          className={`service-status ${
+            serviceHandshake.ok ? 'service-status-ok' : 'service-status-muted'
+          }`}
+          title={
+            serviceHandshake.ok
+              ? 'Platform available'
+              : 'Platform unavailable'
+          }
+          aria-label={
+            serviceHandshake.ok ? 'Platform available' : 'Platform unavailable'
+          }
+        >
+          {serviceHandshake.ok ? <CheckCircle2 size={16} /> : <CircleDashed size={16} />}
+        </span>
+      </footer>
     </main>
   );
+}
+
+function isFrameRequest(headerStore: Headers) {
+  return headerStore.get('sec-fetch-dest') === 'iframe';
 }

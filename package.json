@@ -1,5 +1,5 @@
 {
-  "name": "@llm-to-apps/money-template",
+  "name": "@os7/money-template",
   "version": "0.1.0",
   "private": true,
   "scripts": {

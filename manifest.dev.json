@@ -1,15 +1,15 @@
 {
   "$schema": "../manifest.schema.json",
   "schemaVersion": 1,
-  "id": "money",
-  "slug": "money",
-  "name": "Money",
-  "description": "Personal finance dashboard with own database.",
+  "id": "money-dev",
+  "slug": "money-dev",
+  "name": "Money (dev)",
+  "description": "Personal finance dashboard with own database, using the local dev image.",
   "icon": "money",
   "status": "available",
-  "sortOrder": 10,
+  "sortOrder": 11,
   "source": {
-    "repository": "money-template",
+    "repository": "money-template-dev",
     "remote": "git@github.com:os7/money-template.git",
     "path": "templates/money"
   },
@@ -21,7 +21,7 @@
       "preserve": ["node_modules", ".next"]
     }
   },
-  "image": "ghcr.io/os7/money-template:sha-aee8dcd",
+  "image": "os7-money:dev",
   "runtime": {
     "workdir": "/workspace",
     "appPort": 3001,

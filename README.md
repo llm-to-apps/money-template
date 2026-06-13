@@ -1,6 +1,6 @@
 # Money Template
 
-Minimal personal finance app for LLAgents templates.
+Minimal personal finance app for OS7 templates.
 
 ## Stack
 

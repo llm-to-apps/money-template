@@ -13,7 +13,7 @@ permissions:
   packages: write
 
 env:
-  IMAGE_NAME: ghcr.io/llm-to-apps/money-template
+  IMAGE_NAME: ghcr.io/os7/money-template
 
 jobs:
   test:
