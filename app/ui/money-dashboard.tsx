@@ -54,6 +54,11 @@ type MoneyUser = {
   role: string;
 };
 
+type MoneyDashboardProps = {
+  initialIsEmbedded: boolean;
+  initialUser: MoneyUser;
+};
+
 function formatMoney(cents: number) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -65,11 +70,14 @@ function formatDate(value: Date | string) {
   return new Date(value).toLocaleDateString('en-US');
 }
 
-export function MoneyDashboard() {
+export function MoneyDashboard({
+  initialIsEmbedded,
+  initialUser
+}: MoneyDashboardProps) {
   const [snapshot, setSnapshot] = useState<MoneySnapshot | null>(null);
-  const [user, setUser] = useState<MoneyUser | null>(null);
+  const [user, setUser] = useState<MoneyUser>(initialUser);
   const [serviceAvailable, setServiceAvailable] = useState(false);
-  const [isEmbedded, setIsEmbedded] = useState(true);
+  const [isEmbedded, setIsEmbedded] = useState(initialIsEmbedded);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -77,7 +85,6 @@ export function MoneyDashboard() {
   const defaultCategoryId = snapshot?.categories[0]?.id ?? '';
 
   useEffect(() => {
-    setIsEmbedded(window.parent !== window);
     void loadSnapshot({ showLoading: true });
 
     const events = new EventSource('/api/events');
@@ -263,7 +270,7 @@ export function MoneyDashboard() {
     );
   }
 
-  if (!snapshot || !user) {
+  if (!snapshot) {
     return (
       <main className="page">
         <header className="header">
