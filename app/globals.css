@@ -295,6 +295,17 @@ button {
   text-align: center;
 }
 
+.loading-panel {
+  max-width: 1120px;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 22px;
+  background: var(--panel);
+  color: var(--muted);
+  font-weight: 700;
+}
+
 .footer {
   max-width: 1120px;
   margin: 20px auto 0;

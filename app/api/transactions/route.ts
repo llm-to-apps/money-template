@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TransactionType } from '@prisma/client';
 
-import { getCurrentUser } from '../../lib/auth';
+import { getCurrentUser, isManuallyLoggedOut } from '../../lib/auth';
 import { prisma } from '../../lib/db';
 import { broadcastAppEvent } from '../../lib/events';
+import { checkProjectServiceHandshake } from '../../lib/s2s';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -16,11 +17,34 @@ type CreateTransactionRequest = {
 };
 
 export async function GET() {
-  if (!(await getCurrentUser())) {
-    return NextResponse.json({ ok: false, message: 'Unauthorized' }, { status: 401 });
+  const [user, manuallyLoggedOut] = await Promise.all([
+    getCurrentUser(),
+    isManuallyLoggedOut()
+  ]);
+
+  if (!user) {
+    return NextResponse.json(
+      {
+        ok: false,
+        redirectTo: manuallyLoggedOut ? '/auth/signed-out' : '/auth/login'
+      },
+      { status: 401 }
+    );
   }
 
-  return NextResponse.json(await getMoneySnapshot());
+  const [snapshot, serviceHandshake] = await Promise.all([
+    getMoneySnapshot(),
+    checkProjectServiceHandshake()
+  ]);
+
+  return NextResponse.json({
+    ...snapshot,
+    serviceAvailable: serviceHandshake.ok,
+    user: {
+      displayName: user.name,
+      role: user.role
+    }
+  });
 }
 
 export async function POST(request: NextRequest) {

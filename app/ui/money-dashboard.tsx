@@ -37,11 +37,20 @@ export type MoneySnapshot = {
   }>;
 };
 
-type MoneyDashboardProps = {
+type MoneyDashboardPayload = MoneySnapshot & {
+  serviceAvailable: boolean;
+  user: {
+    displayName: string | null;
+    role: string;
+  };
+};
+
+type AuthErrorPayload = {
+  redirectTo?: string;
+};
+
+type MoneyUser = {
   displayName: string | null;
-  initialServiceAvailable: boolean;
-  initialSnapshot: MoneySnapshot;
-  isEmbedded: boolean;
   role: string;
 };
 
@@ -56,20 +65,21 @@ function formatDate(value: Date | string) {
   return new Date(value).toLocaleDateString('en-US');
 }
 
-export function MoneyDashboard({
-  displayName,
-  initialServiceAvailable,
-  initialSnapshot,
-  isEmbedded,
-  role
-}: MoneyDashboardProps) {
-  const [snapshot, setSnapshot] = useState(initialSnapshot);
+export function MoneyDashboard() {
+  const [snapshot, setSnapshot] = useState<MoneySnapshot | null>(null);
+  const [user, setUser] = useState<MoneyUser | null>(null);
+  const [serviceAvailable, setServiceAvailable] = useState(false);
+  const [isEmbedded, setIsEmbedded] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const defaultCategoryId = snapshot.categories[0]?.id ?? '';
+  const defaultCategoryId = snapshot?.categories[0]?.id ?? '';
 
   useEffect(() => {
+    setIsEmbedded(window.parent !== window);
+    void loadSnapshot({ showLoading: true });
+
     const events = new EventSource('/api/events');
 
     events.addEventListener('money.updated', () => {
@@ -82,23 +92,53 @@ export function MoneyDashboard({
   }, []);
 
   const categoryById = useMemo(
-    () => new Map(snapshot.categories.map((category) => [category.id, category])),
-    [snapshot.categories]
+    () =>
+      new Map(
+        (snapshot?.categories ?? []).map((category) => [category.id, category])
+      ),
+    [snapshot?.categories]
   );
 
-  async function loadSnapshot() {
-    const response = await fetch('/api/transactions', {
-      cache: 'no-store'
-    });
-
-    if (!response.ok) {
-      return;
+  async function loadSnapshot(options: { showLoading?: boolean } = {}) {
+    if (options.showLoading) {
+      setIsLoading(true);
     }
 
-    const nextSnapshot = (await response.json()) as MoneySnapshot;
-    startTransition(() => {
-      setSnapshot(nextSnapshot);
-    });
+    try {
+      const response = await fetch('/api/transactions', {
+        cache: 'no-store'
+      });
+
+      if (response.status === 401) {
+        const payload = (await response.json().catch(() => null)) as
+          | AuthErrorPayload
+          | null;
+        window.location.replace(payload?.redirectTo ?? '/auth/login');
+        return;
+      }
+
+      if (!response.ok) {
+        setError('Could not load transactions.');
+        return;
+      }
+
+      const nextSnapshot = (await response.json()) as MoneyDashboardPayload;
+      startTransition(() => {
+        setSnapshot({
+          categories: nextSnapshot.categories,
+          summary: nextSnapshot.summary,
+          transactions: nextSnapshot.transactions
+        });
+        setServiceAvailable(nextSnapshot.serviceAvailable);
+        setUser(nextSnapshot.user);
+      });
+    } catch {
+      setError('Could not load transactions.');
+    } finally {
+      if (options.showLoading) {
+        setIsLoading(false);
+      }
+    }
   }
 
   async function addTransaction(event: FormEvent<HTMLFormElement>) {
@@ -108,6 +148,11 @@ export function MoneyDashboard({
     }
 
     setError(null);
+
+    if (!snapshot) {
+      setError('Transactions are still loading.');
+      return;
+    }
 
     const form = event.currentTarget;
     const formData = new FormData(form);
@@ -137,21 +182,32 @@ export function MoneyDashboard({
     };
 
     startTransition(() => {
-      setSnapshot((current) => ({
-        ...current,
-        summary: {
-          balanceCents:
-            current.summary.balanceCents +
-            (type === 'INCOME' ? optimisticAmountCents : -optimisticAmountCents),
-          expensesCents:
-            current.summary.expensesCents +
-            (type === 'EXPENSE' ? optimisticAmountCents : 0),
-          incomeCents:
-            current.summary.incomeCents +
-            (type === 'INCOME' ? optimisticAmountCents : 0)
-        },
-        transactions: [optimisticTransaction, ...current.transactions].slice(0, 12)
-      }));
+      setSnapshot((current) => {
+        if (!current) {
+          return current;
+        }
+
+        return {
+          ...current,
+          summary: {
+            balanceCents:
+              current.summary.balanceCents +
+              (type === 'INCOME'
+                ? optimisticAmountCents
+                : -optimisticAmountCents),
+            expensesCents:
+              current.summary.expensesCents +
+              (type === 'EXPENSE' ? optimisticAmountCents : 0),
+            incomeCents:
+              current.summary.incomeCents +
+              (type === 'INCOME' ? optimisticAmountCents : 0)
+          },
+          transactions: [optimisticTransaction, ...current.transactions].slice(
+            0,
+            12
+          )
+        };
+      });
     });
     form.reset();
 
@@ -188,6 +244,46 @@ export function MoneyDashboard({
     }
   }
 
+  if (isLoading) {
+    return (
+      <main className="page">
+        <header className="header">
+          <div className="brand">
+            <div className="brand-mark">
+              <Wallet size={22} />
+            </div>
+            <div>
+              <h1>Money</h1>
+              <p>Track income, expenses, and monthly cash flow.</p>
+            </div>
+          </div>
+        </header>
+        <section className="loading-panel">Loading money dashboard...</section>
+      </main>
+    );
+  }
+
+  if (!snapshot || !user) {
+    return (
+      <main className="page">
+        <header className="header">
+          <div className="brand">
+            <div className="brand-mark">
+              <Wallet size={22} />
+            </div>
+            <div>
+              <h1>Money</h1>
+              <p>Track income, expenses, and monthly cash flow.</p>
+            </div>
+          </div>
+        </header>
+        <section className="loading-panel">
+          {error ?? 'Could not load money dashboard.'}
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="page">
       <header className="header">
@@ -202,8 +298,8 @@ export function MoneyDashboard({
         </div>
         <div className="account">
           <div className="account-card">
-            <span className="account-name">{displayName}</span>
-            <span className={`account-role role-${role}`}>{role}</span>
+            <span className="account-name">{user.displayName}</span>
+            <span className={`account-role role-${user.role}`}>{user.role}</span>
           </div>
           {!isEmbedded ? (
             <form action="/api/auth/logout" method="post">
@@ -334,18 +430,18 @@ export function MoneyDashboard({
       <footer className="footer">
         <span
           className={`service-status ${
-            initialServiceAvailable ? 'service-status-ok' : 'service-status-muted'
+            serviceAvailable ? 'service-status-ok' : 'service-status-muted'
           }`}
           title={
-            initialServiceAvailable
+            serviceAvailable
               ? 'Platform available'
               : 'Platform unavailable'
           }
           aria-label={
-            initialServiceAvailable ? 'Platform available' : 'Platform unavailable'
+            serviceAvailable ? 'Platform available' : 'Platform unavailable'
           }
         >
-          {initialServiceAvailable ? (
+          {serviceAvailable ? (
             <CheckCircle2 size={16} />
           ) : (
             <CircleDashed size={16} />
