@@ -8,12 +8,16 @@ export function RealtimeRefresh() {
 
   useEffect(() => {
     const events = new EventSource('/api/events');
+    const refreshInterval = window.setInterval(() => {
+      router.refresh();
+    }, 3000);
 
     events.addEventListener('money.updated', () => {
       router.refresh();
     });
 
     return () => {
+      window.clearInterval(refreshInterval);
       events.close();
     };
   }, [router]);
