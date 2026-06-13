@@ -20,7 +20,7 @@ WORKDIR /workspace
 
 ENV NODE_ENV=development
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3001
+ENV PORT=80
 ENV HOSTNAME=0.0.0.0
 ENV AGENT_WORKDIR=/workspace
 ENV AGENT_TOOLS_PORT=7070
@@ -37,6 +37,6 @@ COPY public ./public
 COPY next.config.ts ./next.config.ts
 COPY AGENT.md README.md tsconfig.json .gitignore ./
 
-EXPOSE 3001 7070
+EXPOSE 80 7070
 
 ENTRYPOINT ["agent-tools"]

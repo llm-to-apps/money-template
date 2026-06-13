@@ -25,7 +25,7 @@ The platform should provide:
 
 ```text
 DATABASE_URL
-APP_PORT=3001
+APP_PORT=80
 ```
 
 Useful commands:
