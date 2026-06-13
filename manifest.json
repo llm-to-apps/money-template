@@ -10,7 +10,7 @@
   "sortOrder": 10,
   "source": {
     "repository": "money-template",
-    "remote": "git@github.com:os7/money-template.git",
+    "remote": "git@github.com:llm-to-apps/money-template.git",
     "path": "templates/money"
   },
   "git": {
@@ -21,10 +21,10 @@
       "preserve": ["node_modules", ".next"]
     }
   },
-  "image": "ghcr.io/os7/money-template:sha-aee8dcd",
+  "image": "ghcr.io/llm-to-apps/money-template:latest",
   "runtime": {
     "workdir": "/workspace",
-    "appPort": 3001,
+    "appPort": 80,
     "agentPort": 7070,
     "restoreCommand": "npm install",
     "startupCommands": "npm run prisma:generate && npm run db:deploy && npm run db:seed",
