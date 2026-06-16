@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { createOAuthRequest } from '../../lib/auth';
+import { clearManualLogout, createOAuthRequest } from '../../lib/auth';
+import { isLocalAuthMode } from '../../lib/env';
 import { publicOrigin } from '../../lib/request-origin';
 
 export async function GET(request: NextRequest) {
+  if (isLocalAuthMode()) {
+    await clearManualLogout();
+
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
   const origin = publicOrigin();
   const oauthRequest = await createOAuthRequest(origin);
   const payload = JSON.stringify(oauthRequest).replace(/</g, '\\u003c');

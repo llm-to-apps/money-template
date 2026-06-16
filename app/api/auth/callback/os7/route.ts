@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { handleOAuthCallback } from '../../../../lib/auth';
+import { isLocalAuthMode } from '../../../../lib/env';
 import { publicOrigin } from '../../../../lib/request-origin';
 
 export async function GET(request: NextRequest) {
+  if (isLocalAuthMode()) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
   const origin = publicOrigin();
   const code = request.nextUrl.searchParams.get('code');
   const state = request.nextUrl.searchParams.get('state');

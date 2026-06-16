@@ -1,31 +1,44 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import { Button, Center, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import { Wallet } from 'lucide-react';
 
+import { isLocalAuthMode } from '../../lib/env';
+
 export default function SignedOutPage() {
+  const isLocalAuth = isLocalAuthMode();
+
   return (
-    <main className="auth-page">
-      <section className="auth-panel">
-        <div className="brand-mark">
+    <Center mih="100vh" p="md">
+      <Paper withBorder shadow="sm" radius="md" p="xl" maw={420} w="100%">
+        <Stack align="center" ta="center">
+          <ThemeIcon size={48} radius="md">
           <Wallet size={22} />
-        </div>
-        <h1>You are signed out of Money</h1>
-        <p>Continue with your OS7 account to return to Money.</p>
-        <Link
-          className="button auth-button"
-          href="/api/auth/login?interactive=1"
-          aria-label="Continue with OS7"
-        >
-          <Image
-            className="auth-button-logo"
-            src="/brand/os7-logo.svg"
-            alt="OS7"
-            width={62}
-            height={32}
-            priority
-          />
-        </Link>
-      </section>
-    </main>
+          </ThemeIcon>
+          <Title order={1} size="h3">You are signed out of Money</Title>
+          <Text c="dimmed">
+          {isLocalAuth
+            ? 'Continue with the local development user to return to Money.'
+            : 'Continue with your OS7 account to return to Money.'}
+          </Text>
+          <Button
+            component="a"
+            href="/api/auth/login?interactive=1"
+            aria-label={isLocalAuth ? 'Continue as local' : 'Continue with OS7'}
+          >
+            {isLocalAuth ? (
+              'Continue as Local'
+            ) : (
+              <Image
+                src="/brand/os7-logo.svg"
+                alt="OS7"
+                width={62}
+                height={32}
+                priority
+              />
+            )}
+          </Button>
+        </Stack>
+      </Paper>
+    </Center>
   );
 }

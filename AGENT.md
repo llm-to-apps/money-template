@@ -7,6 +7,16 @@ Read it before making code, database, MCP, or UI changes.
 
 Money is a personal finance app backed by MySQL and Prisma.
 
+Money should feel like a modern app-like client experience, not an SSR-first
+dashboard. The server-rendered page should do auth, routing, and bootstrap work.
+Ordinary dashboard data should be loaded and refreshed through focused JSON APIs
+from the client. Use local state, optimistic updates, targeted fetches, and
+realtime notifications for routine workflows.
+
+Do not reintroduce server-rendered dashboard data as the default path for normal
+Money state. SSR is acceptable for auth gates, redirects, static shell content,
+and rare whole-route state changes that are explicitly justified.
+
 Keep business operations explicit and exposed through the application MCP endpoint:
 
 - `POST /api/mcp`
@@ -60,10 +70,25 @@ When adding a mutating MCP action or server action:
 
 Keep the first screen as the actual money dashboard.
 
+Money uses Mantine as the UI framework. Prefer Mantine components directly from
+`@mantine/core` and `@mantine/hooks` instead of building local component
+wrappers. Do not reintroduce Tailwind, shadcn/ui, Radix wrapper components, or a
+custom local UI kit for ordinary controls, tables, modals, menus, layout, or
+forms.
+
+Always check for an existing Mantine or official Mantine-compatible component
+before implementing UI behavior locally. Standard controls and patterns such as
+date inputs, selects, tables, drawers, modals, popovers, menus, notifications,
+AppShell layout, cards, and buttons must use framework components by default.
+Custom UI code is a last resort when no suitable framework component exists or
+when required product behavior cannot be composed from Mantine primitives.
+
 When adding a new model that users manage:
 
 - Add visible UI only when the feature needs direct user interaction.
 - Keep forms compact and clear.
+- Use Mantine form controls, tables, cards, modals, menus, notifications, and
+  AppShell primitives before writing custom CSS or custom interaction code.
 - Keep common CRUD interactions smooth: use local state, optimistic updates, or targeted API fetches so forms do not reload the whole view.
 - Avoid `window.location.reload()`, periodic full-page polling, and `router.refresh()` as the default update mechanism for routine mutations. Use them only for rare whole-route state changes and explain why.
 

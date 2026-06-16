@@ -12,15 +12,49 @@ enum TransactionType {
   EXPENSE
 }
 
-model Category {
-  id           String        @id @default(cuid())
-  name         String
-  color        String        @default("#0f8b6f")
-  transactions Transaction[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+enum CategoryScope {
+  INCOME
+  EXPENSE
+  BOTH
+}
 
-  @@unique([name])
+enum RecordStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model Wallet {
+  id                  String        @id @default(cuid())
+  name                String        @unique
+  comment             String?
+  currency            String        @default("USD")
+  color               String        @default("#059669")
+  initialBalanceCents Int           @default(0)
+  status              RecordStatus  @default(ACTIVE)
+  transactions        Transaction[]
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([status])
+}
+
+model Category {
+  id                   String        @id @default(cuid())
+  name                 String
+  color                String        @default("#059669")
+  scope                CategoryScope @default(BOTH)
+  parentId             String?
+  parent               Category?     @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children             Category[]    @relation("CategoryTree")
+  status               RecordStatus  @default(ACTIVE)
+  transactions         Transaction[]
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  @@unique([parentId, name])
+  @@index([parentId])
+  @@index([status])
+  @@index([scope])
 }
 
 model Transaction {
@@ -29,6 +63,8 @@ model Transaction {
   amountCents Int
   note        String?
   occurredAt  DateTime
+  walletId    String
+  wallet      Wallet          @relation(fields: [walletId], references: [id], onDelete: Restrict)
   categoryId  String
   category    Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   createdAt   DateTime        @default(now())
@@ -36,6 +72,7 @@ model Transaction {
 
   @@index([occurredAt])
   @@index([type])
+  @@index([walletId])
   @@index([categoryId])
 }
 

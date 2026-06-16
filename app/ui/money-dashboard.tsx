@@ -1,94 +1,77 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState, useTransition } from 'react';
-import { CheckCircle2, CircleDashed, Wallet } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import {
+  FormEvent,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition
+} from 'react';
+import {
+  Alert,
+  AppShell,
+  Burger,
+  Center,
+  Container,
+  Group,
+  Image,
+  NavLink,
+  Stack,
+  Text,
+  ThemeIcon
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { LayoutDashboard, ReceiptText, Tags, Wallet, WalletCards } from 'lucide-react';
 
-type TransactionType = 'INCOME' | 'EXPENSE';
+import type {
+  AuthErrorPayload,
+  MoneyDashboardPayload,
+  MoneyDashboardProps,
+  MoneySnapshot,
+  MoneyUser,
+  MoneyView,
+  TransactionRecord,
+  TransactionType
+} from './money-types';
+import { ActionErrorModal, RouteView, Splash, UserMenu } from './money-views';
+import { formatDateInputValue, viewFromPathname, routeModeFromPathname, waitForUiDelay } from './money-utils';
 
-export type MoneySnapshot = {
-  categories: Array<{
-    color: string;
-    createdAt: Date | string;
-    id: string;
-    name: string;
-    updatedAt: Date | string;
-  }>;
-  summary: {
-    balanceCents: number;
-    expensesCents: number;
-    incomeCents: number;
-  };
-  transactions: Array<{
-    amountCents: number;
-    category: {
-      color: string;
-      createdAt: Date | string;
-      id: string;
-      name: string;
-      updatedAt: Date | string;
-    };
-    categoryId: string;
-    createdAt: Date | string;
-    id: string;
-    note: string | null;
-    occurredAt: Date | string;
-    type: TransactionType;
-    updatedAt: Date | string;
-  }>;
-};
-
-type MoneyDashboardPayload = MoneySnapshot & {
-  serviceAvailable: boolean;
-  user: {
-    displayName: string | null;
-    role: string;
-  };
-};
-
-type AuthErrorPayload = {
-  redirectTo?: string;
-};
-
-type MoneyUser = {
-  displayName: string | null;
-  role: string;
-};
-
-type MoneyDashboardProps = {
-  initialIsEmbedded: boolean;
-  initialUser: MoneyUser;
-};
-
-function formatMoney(cents: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD'
-  }).format(cents / 100);
-}
-
-function formatDate(value: Date | string) {
-  return new Date(value).toLocaleDateString('en-US');
-}
 
 export function MoneyDashboard({
   initialIsEmbedded,
   initialUser
 }: MoneyDashboardProps) {
+  const pathname = usePathname();
+  const router = useRouter();
   const [snapshot, setSnapshot] = useState<MoneySnapshot | null>(null);
   const [user, setUser] = useState<MoneyUser>(initialUser);
-  const [serviceAvailable, setServiceAvailable] = useState(false);
-  const [isEmbedded, setIsEmbedded] = useState(initialIsEmbedded);
+  const [isEmbedded] = useState(initialIsEmbedded);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isManaging, setIsManaging] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [mobileNavOpened, mobileNav] = useDisclosure(false);
   const [isPending, startTransition] = useTransition();
-  const defaultCategoryId = snapshot?.categories[0]?.id ?? '';
+  const optimisticId = useRef(0);
+  const splashStartedAt = useRef(Date.now());
+  const activeCategories =
+    snapshot?.categories.filter((category) => category.status === 'ACTIVE') ?? [];
+  const activeWallets =
+    snapshot?.wallets.filter((wallet) => wallet.status === 'ACTIVE') ?? [];
+  const defaultCategoryId = activeCategories[0]?.id ?? '';
+  const defaultWalletId = activeWallets[0]?.id ?? '';
+  const currentView = viewFromPathname(pathname);
+  const routeMode = routeModeFromPathname(pathname);
 
   useEffect(() => {
     void loadSnapshot({ showLoading: true });
 
     const events = new EventSource('/api/events');
-
     events.addEventListener('money.updated', () => {
       void loadSnapshot();
     });
@@ -97,6 +80,22 @@ export function MoneyDashboard({
       events.close();
     };
   }, []);
+
+  useEffect(() => {
+    if (isLoading || !showSplash) {
+      return;
+    }
+
+    const elapsed = Date.now() - splashStartedAt.current;
+    const exitDelay = Math.max(0, 800 - elapsed);
+    const hideTimer = window.setTimeout(() => {
+      setShowSplash(false);
+    }, exitDelay);
+
+    return () => {
+      window.clearTimeout(hideTimer);
+    };
+  }, [isLoading, showSplash]);
 
   const categoryById = useMemo(
     () =>
@@ -133,10 +132,12 @@ export function MoneyDashboard({
       startTransition(() => {
         setSnapshot({
           categories: nextSnapshot.categories,
+          categoryBreakdown: nextSnapshot.categoryBreakdown,
+          monthDynamics: nextSnapshot.monthDynamics,
           summary: nextSnapshot.summary,
-          transactions: nextSnapshot.transactions
+          transactions: nextSnapshot.transactions,
+          wallets: nextSnapshot.wallets
         });
-        setServiceAvailable(nextSnapshot.serviceAvailable);
         setUser(nextSnapshot.user);
       });
     } catch {
@@ -165,67 +166,104 @@ export function MoneyDashboard({
     const formData = new FormData(form);
     const type = String(formData.get('type')) as TransactionType;
     const categoryId = String(formData.get('categoryId') ?? '');
+    const walletId = String(formData.get('walletId') ?? '');
     const amount = Number(formData.get('amount'));
     const note = String(formData.get('note') || '').trim();
+    const occurredAtValue = String(formData.get('occurredAt') || '');
+    const occurredAt = new Date(`${occurredAtValue}T12:00:00`);
     const category = categoryById.get(categoryId);
+    const wallet = snapshot.wallets.find((item) => item.id === walletId);
 
-    if (!category || !Number.isFinite(amount) || amount <= 0) {
+    if (!category || !wallet || !Number.isFinite(amount) || amount <= 0 || Number.isNaN(occurredAt.getTime())) {
       setError('Enter a valid transaction.');
       return;
     }
 
-    const now = new Date().toISOString();
-    const optimisticAmountCents = Math.round(amount * 100);
-    const optimisticTransaction = {
-      amountCents: optimisticAmountCents,
-      category,
-      categoryId,
-      createdAt: now,
-      id: `optimistic-${crypto.randomUUID()}`,
-      note: note || null,
-      occurredAt: now,
-      type,
-      updatedAt: now
-    };
-
-    startTransition(() => {
-      setSnapshot((current) => {
-        if (!current) {
-          return current;
-        }
-
-        return {
-          ...current,
-          summary: {
-            balanceCents:
-              current.summary.balanceCents +
-              (type === 'INCOME'
-                ? optimisticAmountCents
-                : -optimisticAmountCents),
-            expensesCents:
-              current.summary.expensesCents +
-              (type === 'EXPENSE' ? optimisticAmountCents : 0),
-            incomeCents:
-              current.summary.incomeCents +
-              (type === 'INCOME' ? optimisticAmountCents : 0)
-          },
-          transactions: [optimisticTransaction, ...current.transactions].slice(
-            0,
-            12
-          )
-        };
-      });
-    });
-    form.reset();
-
     setIsSaving(true);
     try {
+      await waitForUiDelay();
+
+      const now = new Date().toISOString();
+      const optimisticAmountCents = Math.round(amount * 100);
+      optimisticId.current += 1;
+      const optimisticTransaction: TransactionRecord = {
+        amountCents: optimisticAmountCents,
+        category,
+        categoryId,
+        createdAt: now,
+        id: `optimistic-${optimisticId.current}`,
+        note: note || null,
+        occurredAt: occurredAt.toISOString(),
+        type,
+        updatedAt: now,
+        wallet,
+        walletId
+      };
+
+      startTransition(() => {
+        setSnapshot((current) => {
+          if (!current) {
+            return current;
+          }
+
+          return {
+            ...current,
+            summary: {
+              balanceCents:
+                current.summary.balanceCents +
+                (type === 'INCOME'
+                  ? optimisticAmountCents
+                  : -optimisticAmountCents),
+              currentMonth: {
+                balanceCents:
+                  current.summary.currentMonth.balanceCents +
+                  (type === 'INCOME'
+                    ? optimisticAmountCents
+                    : -optimisticAmountCents),
+                expensesCents:
+                  current.summary.currentMonth.expensesCents +
+                  (type === 'EXPENSE' ? optimisticAmountCents : 0),
+                incomeCents:
+                  current.summary.currentMonth.incomeCents +
+                  (type === 'INCOME' ? optimisticAmountCents : 0)
+              },
+              expensesCents:
+                current.summary.expensesCents +
+                (type === 'EXPENSE' ? optimisticAmountCents : 0),
+              incomeCents:
+                current.summary.incomeCents +
+                (type === 'INCOME' ? optimisticAmountCents : 0),
+              previousMonth: current.summary.previousMonth
+            },
+            transactions: [optimisticTransaction, ...current.transactions].slice(
+              0,
+              12
+            ),
+            wallets: current.wallets.map((currentWallet) =>
+              currentWallet.id === walletId
+                ? {
+                    ...currentWallet,
+                    balanceCents:
+                      currentWallet.balanceCents +
+                      (type === 'INCOME'
+                        ? optimisticAmountCents
+                        : -optimisticAmountCents)
+                  }
+                : currentWallet
+            )
+          };
+        });
+      });
+      form.reset();
+
       const response = await fetch('/api/transactions', {
         body: JSON.stringify({
           amount,
           categoryId,
           note,
-          type
+          occurredAt: formatDateInputValue(occurredAt),
+          type,
+          walletId
         }),
         headers: {
           'content-type': 'application/json'
@@ -243,6 +281,7 @@ export function MoneyDashboard({
       startTransition(() => {
         setSnapshot(nextSnapshot);
       });
+      router.push('/transactions');
     } catch {
       setError('Could not save transaction.');
       await loadSnapshot();
@@ -251,210 +290,302 @@ export function MoneyDashboard({
     }
   }
 
-  if (isLoading) {
-    return (
-      <main className="page">
-        <header className="header">
-          <div className="brand">
-            <div className="brand-mark">
-              <Wallet size={22} />
-            </div>
-            <div>
-              <h1>Money</h1>
-              <p>Track income, expenses, and monthly cash flow.</p>
-            </div>
-          </div>
-        </header>
-        <section className="loading-panel">Loading money dashboard...</section>
-      </main>
-    );
+  async function runJsonMutation(path: string, init: RequestInit) {
+    setError(null);
+    setIsManaging(true);
+    try {
+      await waitForUiDelay();
+
+      const response = await fetch(path, {
+        ...init,
+        headers: {
+          'content-type': 'application/json',
+          ...(init.headers ?? {})
+        }
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          message?: string;
+        } | null;
+        setError(payload?.message ?? 'Could not save changes.');
+        return false;
+      }
+
+      const nextSnapshot = (await response.json()) as MoneySnapshot;
+      startTransition(() => {
+        setSnapshot(nextSnapshot);
+      });
+      return true;
+    } catch {
+      setError('Could not save changes.');
+      await loadSnapshot();
+      return false;
+    } finally {
+      setIsManaging(false);
+    }
+  }
+
+  async function createWallet(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    const ok = await runJsonMutation('/api/wallets', {
+      body: JSON.stringify(Object.fromEntries(formData)),
+      method: 'POST'
+    });
+    if (ok) {
+      form.reset();
+      router.push('/wallets');
+    }
+  }
+
+  async function updateWallet(event: FormEvent<HTMLFormElement>, walletId: string) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const payload: Record<string, FormDataEntryValue> =
+      Object.fromEntries(formData);
+
+    const ok = await runJsonMutation(`/api/wallets/${walletId}`, {
+      body: JSON.stringify(payload),
+      method: 'PATCH'
+    });
+    if (ok) {
+      router.push('/wallets');
+    }
+  }
+
+  async function deleteWallet(walletId: string) {
+    const ok = await runJsonMutation(`/api/wallets/${walletId}`, {
+      method: 'DELETE'
+    });
+    if (ok) {
+      router.push('/wallets');
+    }
+  }
+
+  async function createCategory(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    const ok = await runJsonMutation('/api/categories', {
+      body: JSON.stringify(Object.fromEntries(formData)),
+      method: 'POST'
+    });
+    if (ok) {
+      form.reset();
+      router.push('/categories');
+    }
+  }
+
+  async function updateCategory(
+    event: FormEvent<HTMLFormElement>,
+    categoryId: string
+  ) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const payload: Record<string, FormDataEntryValue> =
+      Object.fromEntries(formData);
+
+    const ok = await runJsonMutation(`/api/categories/${categoryId}`, {
+      body: JSON.stringify(payload),
+      method: 'PATCH'
+    });
+    if (ok) {
+      router.push('/categories');
+    }
+  }
+
+  async function deleteCategory(categoryId: string) {
+    const ok = await runJsonMutation(`/api/categories/${categoryId}`, {
+      method: 'DELETE'
+    });
+    if (ok) {
+      router.push('/categories');
+    }
+  }
+
+  async function updateTransaction(
+    event: FormEvent<HTMLFormElement>,
+    transactionId: string
+  ) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    const ok = await runJsonMutation(`/api/transactions/${transactionId}`, {
+      body: JSON.stringify(Object.fromEntries(formData)),
+      method: 'PATCH'
+    });
+    if (ok) {
+      router.push('/transactions');
+    }
+  }
+
+  async function deleteTransaction(transactionId: string) {
+    const ok = await runJsonMutation(`/api/transactions/${transactionId}`, {
+      method: 'DELETE'
+    });
+    if (ok) {
+      router.push('/transactions');
+    }
+  }
+
+  if (showSplash) {
+    return <Splash />;
   }
 
   if (!snapshot) {
     return (
-      <main className="page">
-        <header className="header">
-          <div className="brand">
-            <div className="brand-mark">
-              <Wallet size={22} />
-            </div>
-            <div>
-              <h1>Money</h1>
-              <p>Track income, expenses, and monthly cash flow.</p>
-            </div>
-          </div>
-        </header>
-        <section className="loading-panel">
+      <Center mih="100vh">
+        <Alert color="red" title="Could not load Money">
           {error ?? 'Could not load money dashboard.'}
-        </section>
-      </main>
+        </Alert>
+      </Center>
     );
   }
 
   return (
-    <main className="page">
-      <header className="header">
-        <div className="brand">
-          <div className="brand-mark">
-            <Wallet size={22} />
-          </div>
-          <div>
-            <h1>Money</h1>
-            <p>Track income, expenses, and monthly cash flow.</p>
-          </div>
-        </div>
-        <div className="account">
-          <div className="account-card">
-            <span className="account-name">{user.displayName}</span>
-            <span className={`account-role role-${user.role}`}>{user.role}</span>
-          </div>
-          {!isEmbedded ? (
-            <form action="/api/auth/logout" method="post">
-              <button className="ghost-button" type="submit">
-                Sign out
-              </button>
-            </form>
-          ) : null}
-        </div>
-      </header>
-
-      <section className="grid">
-        <div>
-          <div className="cards">
-            <div className="card">
-              <span>Balance</span>
-              <strong
-                className={
-                  snapshot.summary.balanceCents >= 0 ? 'positive' : 'negative'
-                }
-              >
-                {formatMoney(snapshot.summary.balanceCents)}
-              </strong>
-            </div>
-            <div className="card">
-              <span>Income</span>
-              <strong className="positive">
-                {formatMoney(snapshot.summary.incomeCents)}
-              </strong>
-            </div>
-            <div className="card">
-              <span>Expenses</span>
-              <strong className="negative">
-                {formatMoney(snapshot.summary.expensesCents)}
-              </strong>
-            </div>
-          </div>
-
-          <div className="panel">
-            <h2>Recent transactions</h2>
-            <div className="transactions">
-              {snapshot.transactions.length === 0 ? (
-                <div className="empty">No transactions yet.</div>
-              ) : (
-                snapshot.transactions.map((transaction) => (
-                  <article className="transaction" key={transaction.id}>
-                    <div>
-                      <h3>{transaction.category.name}</h3>
-                      <p>
-                        {transaction.note || 'No note'} ·{' '}
-                        {formatDate(transaction.occurredAt)}
-                      </p>
-                    </div>
-                    <div
-                      className={`amount ${
-                        transaction.type === 'INCOME' ? 'positive' : 'negative'
-                      }`}
-                    >
-                      {transaction.type === 'INCOME' ? '+' : '-'}
-                      {formatMoney(transaction.amountCents)}
-                    </div>
-                  </article>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-
-        <aside className="panel">
-          <h2>Add transaction</h2>
-          <form
-            action="/api/transactions"
-            className="form"
-            method="post"
-            onSubmit={addTransaction}
-          >
-            <div className="two">
-              <div className="field">
-                <label htmlFor="type">Type</label>
-                <select id="type" name="type" defaultValue="EXPENSE">
-                  <option value="EXPENSE">Expense</option>
-                  <option value="INCOME">Income</option>
-                </select>
-              </div>
-              <div className="field">
-                <label htmlFor="amount">Amount</label>
-                <input
-                  id="amount"
-                  name="amount"
-                  min="0.01"
-                  step="0.01"
-                  type="number"
-                  placeholder="42.00"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="field">
-              <label htmlFor="categoryId">Category</label>
-              <select
-                id="categoryId"
-                name="categoryId"
-                required
-                defaultValue={defaultCategoryId}
-              >
-                {snapshot.categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
+    <AppShell
+      header={{ height: 64 }}
+      navbar={{
+        width: 280,
+        breakpoint: 'sm',
+        collapsed: { desktop: true, mobile: !mobileNavOpened }
+      }}
+      footer={{ height: 44, offset: false }}
+      padding="md"
+    >
+      <AppShell.Header>
+        <Container size="lg" h="100%">
+          <Group h="100%" justify="space-between" wrap="nowrap">
+            <Group gap="sm" wrap="nowrap">
+              <Burger
+                opened={mobileNavOpened}
+                onClick={mobileNav.toggle}
+                hiddenFrom="sm"
+                size="sm"
+                aria-label="Open navigation"
+              />
+              <ThemeIcon size="lg" radius="md" variant="filled">
+                <Wallet size={20} />
+              </ThemeIcon>
+              <Group gap={4} visibleFrom="sm">
+                {moneyNavItems.map((item) => (
+                  <NavLink
+                    key={item.href}
+                    component={Link}
+                    href={item.href}
+                    active={item.view === currentView}
+                    label={item.label}
+                    leftSection={item.icon}
+                    variant="light"
+                    w="auto"
+                    px="sm"
+                  />
                 ))}
-              </select>
-            </div>
+              </Group>
+            </Group>
 
-            <div className="field">
-              <label htmlFor="note">Note</label>
-              <input id="note" name="note" placeholder="Coffee, invoice, rent" />
-            </div>
+            <UserMenu
+              displayName={user.displayName ?? 'Local'}
+              isEmbedded={isEmbedded}
+            />
+          </Group>
+        </Container>
+      </AppShell.Header>
 
-            {error ? <p className="form-error">{error}</p> : null}
+      <AppShell.Navbar p="md">
+        <Stack gap="xs">
+          {moneyNavItems.map((item) => (
+            <NavLink
+              key={item.href}
+              component={Link}
+              href={item.href}
+              active={item.view === currentView}
+              label={item.label}
+              leftSection={item.icon}
+              onClick={mobileNav.close}
+            />
+          ))}
+        </Stack>
+      </AppShell.Navbar>
 
-            <button className="button" disabled={isPending || isSaving} type="submit">
-              Save transaction
-            </button>
-          </form>
-        </aside>
-      </section>
-      <footer className="footer">
-        <span
-          className={`service-status ${
-            serviceAvailable ? 'service-status-ok' : 'service-status-muted'
-          }`}
-          title={
-            serviceAvailable
-              ? 'Platform available'
-              : 'Platform unavailable'
-          }
-          aria-label={
-            serviceAvailable ? 'Platform available' : 'Platform unavailable'
-          }
-        >
-          {serviceAvailable ? (
-            <CheckCircle2 size={16} />
-          ) : (
-            <CircleDashed size={16} />
-          )}
-        </span>
-      </footer>
-    </main>
+      <AppShell.Main>
+        <Container size="lg">
+          <ActionErrorModal error={error} onDismiss={() => setError(null)} />
+          <RouteView
+            isManaging={isManaging}
+            onCreateCategory={createCategory}
+            onCreateTransaction={addTransaction}
+            onCreateWallet={createWallet}
+            onDeleteCategory={deleteCategory}
+            onDeleteTransaction={deleteTransaction}
+            onDeleteWallet={deleteWallet}
+            onUpdateCategory={updateCategory}
+            onUpdateTransaction={updateTransaction}
+            onUpdateWallet={updateWallet}
+            routeMode={routeMode}
+            snapshot={snapshot}
+            view={currentView}
+            isPending={isPending}
+            isSaving={isSaving}
+            defaultCategoryId={defaultCategoryId}
+            defaultWalletId={defaultWalletId}
+          />
+        </Container>
+      </AppShell.Main>
+
+      <AppShell.Footer pos="static">
+        <Container size="lg" h="100%">
+          <Group h="100%" justify="space-between">
+            <Text size="xs" c="dimmed">
+              Track income, expenses, and monthly cash flow.
+            </Text>
+            <a
+              aria-label="OS7"
+              href="https://www.os7.dev"
+              rel="noreferrer"
+              target="_blank"
+            >
+              <Image alt="OS7" src="/brand/os7-logo.svg" h={18} />
+            </a>
+          </Group>
+        </Container>
+      </AppShell.Footer>
+    </AppShell>
   );
 }
+
+const moneyNavItems: Array<{
+  href: string;
+  icon: ReactNode;
+  label: string;
+  view: MoneyView;
+}> = [
+  {
+    href: '/',
+    icon: <LayoutDashboard size={16} />,
+    label: 'Dashboard',
+    view: 'dashboard'
+  },
+  {
+    href: '/transactions',
+    icon: <ReceiptText size={16} />,
+    label: 'Transactions',
+    view: 'transactions'
+  },
+  {
+    href: '/wallets',
+    icon: <WalletCards size={16} />,
+    label: 'Wallets',
+    view: 'wallets'
+  },
+  {
+    href: '/categories',
+    icon: <Tags size={16} />,
+    label: 'Categories',
+    view: 'categories'
+  }
+];

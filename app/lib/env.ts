@@ -16,6 +16,33 @@ export function authSecret() {
   return requiredEnv('AUTH_SECRET');
 }
 
+export function authMode() {
+  const mode = process.env.MONEY_AUTH_MODE ?? 'oauth';
+
+  if (mode !== 'oauth' && mode !== 'local') {
+    throw new Error('MONEY_AUTH_MODE must be oauth or local');
+  }
+
+  return mode;
+}
+
+export function isLocalAuthMode() {
+  return authMode() === 'local';
+}
+
+export function localAuthUser() {
+  return {
+    email: process.env.MONEY_LOCAL_USER_EMAIL ?? 'dev@example.local',
+    id: process.env.MONEY_LOCAL_USER_ID ?? 'local-dev-user',
+    name: process.env.MONEY_LOCAL_USER_NAME ?? 'Local',
+    role: process.env.MONEY_LOCAL_USER_ROLE ?? 'admin'
+  };
+}
+
+export function moneyDevMcpToken() {
+  return process.env.MONEY_DEV_MCP_TOKEN || null;
+}
+
 export function appPublicUrl() {
   return requiredEnv('APP_PUBLIC_URL').replace(/\/+$/, '');
 }

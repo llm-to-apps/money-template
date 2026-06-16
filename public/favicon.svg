@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="money-favicon-bg" x1="26" x2="102" y1="16" y2="112" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5fc29c" />
+      <stop offset="1" stop-color="#0a9f72" />
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#money-favicon-bg)" />
+  <g
+    transform="translate(21 21) scale(3.6)"
+    fill="none"
+    stroke="#ffffff"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2.25"
+  >
+    <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+    <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />
+  </g>
+</svg>

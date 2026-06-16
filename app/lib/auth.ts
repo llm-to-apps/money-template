@@ -4,6 +4,8 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { prisma } from './db';
 import {
   authSecret,
+  isLocalAuthMode,
+  localAuthUser,
   oauthAuthorizeUrl,
   oauthClientId,
   oauthClientSecret,
@@ -34,6 +36,7 @@ type OAuthUserInfo = {
 };
 
 export async function createOAuthRequest(origin: string) {
+  ensureOAuthAuthMode();
   const state = createSignedOAuthState();
   const cookieStore = await cookies();
   cookieStore.set(oauthStateCookie, state, {
@@ -88,6 +91,7 @@ export async function handleOAuthCallback({
   origin: string;
   state: string;
 }) {
+  ensureOAuthAuthMode();
   console.info('[Money Auth] handling callback', {
     codePresent: Boolean(code),
     origin,
@@ -120,15 +124,12 @@ export async function handleOAuthCallback({
     }
   });
 
-  await createSession(
-    {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role
-    },
-    origin
-  );
+  await createSession({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role
+  });
   console.info('[Money Auth] local session created', {
     email: user.email,
     origin,
@@ -139,6 +140,22 @@ export async function handleOAuthCallback({
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   const cookieStore = await cookies();
+
+  if (isLocalAuthMode()) {
+    if (cookieStore.get(loggedOutCookie)?.value === '1') {
+      console.info('[Money Auth] local dev user is signed out');
+      return null;
+    }
+
+    const user = localAuthUser();
+    console.info('[Money Auth] local dev user accepted', {
+      email: user.email,
+      userId: user.id
+    });
+
+    return user;
+  }
+
   const token = cookieStore.get(sessionCookie)?.value;
 
   if (!token) {
@@ -192,6 +209,11 @@ export async function clearSession() {
   const cookieStore = await cookies();
   const token = cookieStore.get(sessionCookie)?.value;
 
+  if (isLocalAuthMode()) {
+    cookieStore.delete(sessionCookie);
+    return;
+  }
+
   if (token) {
     await prisma.session
       .delete({
@@ -209,8 +231,7 @@ export async function markManuallyLoggedOut() {
   const cookieStore = await cookies();
   cookieStore.set(loggedOutCookie, '1', {
     httpOnly: true,
-    sameSite: 'none',
-    secure: true,
+    ...manualLogoutCookieOptions(),
     maxAge: 60 * 60 * 24 * 30,
     path: '/'
   });
@@ -220,14 +241,13 @@ export async function clearManualLogout() {
   const cookieStore = await cookies();
   cookieStore.set(loggedOutCookie, '', {
     httpOnly: true,
-    sameSite: 'none',
-    secure: true,
+    ...manualLogoutCookieOptions(),
     maxAge: 0,
     path: '/'
   });
 }
 
-async function createSession(user: CurrentUser, origin: string) {
+async function createSession(user: CurrentUser) {
   const token = randomBytes(32).toString('base64url');
   const expiresAt = new Date(Date.now() + sessionTtlSeconds * 1000);
 
@@ -387,8 +407,24 @@ function signOAuthStatePayload(payload: string) {
   return createHmac('sha256', authSecret()).update(payload).digest('base64url');
 }
 
-function isSecureOrigin(origin: string) {
-  return origin.startsWith('https://');
+function ensureOAuthAuthMode() {
+  if (isLocalAuthMode()) {
+    throw new Error('OAuth is disabled when MONEY_AUTH_MODE=local');
+  }
+}
+
+function manualLogoutCookieOptions() {
+  if (isLocalAuthMode()) {
+    return {
+      sameSite: 'lax' as const,
+      secure: false
+    };
+  }
+
+  return {
+    sameSite: 'none' as const,
+    secure: true
+  };
 }
 
 function constantTimeEqual(left: string, right: string) {
