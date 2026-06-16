@@ -98,3 +98,16 @@ model Session {
   @@index([userId])
   @@index([expiresAt])
 }
+
+model AuditEvent {
+  id        String   @id @default(cuid())
+  action    String
+  userId    String?
+  requestId String?
+  metadata  String?
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([userId])
+  @@index([createdAt])
+}

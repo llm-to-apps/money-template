@@ -1,8 +1,17 @@
-import Image from 'next/image';
-import { Button, Center, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
+import {
+  Button,
+  Center,
+  Paper,
+  Stack,
+  Text,
+  ThemeIcon,
+  Title
+} from '@mantine/core';
 import { Wallet } from 'lucide-react';
 
-import { isLocalAuthMode } from '../../lib/env';
+import { Os7Logo } from '@os7/ui-kit/os7-brand';
+
+import { isLocalAuthMode } from '@/server/env';
 
 export default function SignedOutPage() {
   const isLocalAuth = isLocalAuthMode();
@@ -12,30 +21,22 @@ export default function SignedOutPage() {
       <Paper withBorder shadow="sm" radius="md" p="xl" maw={420} w="100%">
         <Stack align="center" ta="center">
           <ThemeIcon size={48} radius="md">
-          <Wallet size={22} />
+            <Wallet size={22} />
           </ThemeIcon>
-          <Title order={1} size="h3">You are signed out of Money</Title>
+          <Title order={1} size="h3">
+            You are signed out of Money
+          </Title>
           <Text c="dimmed">
-          {isLocalAuth
-            ? 'Continue with the local development user to return to Money.'
-            : 'Continue with your OS7 account to return to Money.'}
+            {isLocalAuth
+              ? 'Continue with the local development user to return to Money.'
+              : 'Continue with your OS7 account to return to Money.'}
           </Text>
           <Button
             component="a"
             href="/api/auth/login?interactive=1"
             aria-label={isLocalAuth ? 'Continue as local' : 'Continue with OS7'}
           >
-            {isLocalAuth ? (
-              'Continue as Local'
-            ) : (
-              <Image
-                src="/brand/os7-logo.svg"
-                alt="OS7"
-                width={62}
-                height={32}
-                priority
-              />
-            )}
+            {isLocalAuth ? 'Continue as Local' : <Os7Logo w={62} />}
           </Button>
         </Stack>
       </Paper>

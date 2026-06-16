@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { clearManualLogout, createLoginRedirectUrl } from '../../../lib/auth';
-import { isLocalAuthMode } from '../../../lib/env';
-import { publicOrigin } from '../../../lib/request-origin';
+import { clearManualLogout, createLoginRedirectUrl } from '@/server/auth';
+import { isLocalAuthMode } from '@/server/env';
+import { publicOrigin } from '@/server/request-origin';
 
 export async function GET(request: NextRequest) {
   await clearManualLogout();

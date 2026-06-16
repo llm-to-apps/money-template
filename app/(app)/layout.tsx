@@ -2,16 +2,12 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { ReactNode } from 'react';
 
-import { getCurrentUser, isManuallyLoggedOut } from '../lib/auth';
-import { MoneyDashboard } from '../ui/money-dashboard';
+import { getCurrentUser, isManuallyLoggedOut } from '@/server/auth';
+import { MoneyDashboard } from '@/features/money/dashboard/money-dashboard';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AppLayout({
-  children
-}: {
-  children: ReactNode;
-}) {
+export default async function AppLayout({ children }: { children: ReactNode }) {
   const isEmbedded = isFrameRequest(await headers());
   const [user, manuallyLoggedOut] = await Promise.all([
     getCurrentUser(),

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { handleOAuthCallback } from '../../../../lib/auth';
-import { isLocalAuthMode } from '../../../../lib/env';
-import { publicOrigin } from '../../../../lib/request-origin';
+import { handleOAuthCallback } from '@/server/auth';
+import { isLocalAuthMode } from '@/server/env';
+import { logError, logInfo, logWarn } from '@/server/logger';
+import { publicOrigin } from '@/server/request-origin';
 
 export async function GET(request: NextRequest) {
   if (isLocalAuthMode()) {
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
   const state = request.nextUrl.searchParams.get('state');
   const error = request.nextUrl.searchParams.get('error');
-  console.info('[Money OAuth Callback] request', {
+  logInfo('[Money OAuth Callback] request', {
     codePresent: Boolean(code),
     error,
     origin,
@@ -21,14 +22,17 @@ export async function GET(request: NextRequest) {
   });
 
   if (error) {
-    console.warn('[Money OAuth Callback] provider returned error', { error, origin });
+    logWarn('[Money OAuth Callback] provider returned error', {
+      error,
+      origin
+    });
     return NextResponse.redirect(
       new URL(`/api/auth/login?interactive=1&error=${error}`, origin)
     );
   }
 
   if (!code || !state) {
-    console.warn('[Money OAuth Callback] invalid callback params', {
+    logWarn('[Money OAuth Callback] invalid callback params', {
       codePresent: Boolean(code),
       origin,
       state
@@ -44,9 +48,13 @@ export async function GET(request: NextRequest) {
       origin,
       state
     });
-    console.info('[Money OAuth Callback] completed', { origin, state });
+    logInfo('[Money OAuth Callback] completed', { origin, state });
   } catch (error) {
-    console.error('Money OAuth callback failed', error);
+    logError('Money OAuth callback failed', {
+      error: error instanceof Error ? error.message : String(error),
+      origin,
+      state
+    });
 
     return NextResponse.redirect(
       new URL('/api/auth/login?interactive=1&error=callback_failed', origin)

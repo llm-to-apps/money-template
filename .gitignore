@@ -7,3 +7,9 @@ next-env.d.ts
 .DS_Store
 npm-debug.log
 tsconfig.tsbuildinfo
+test-results/
+playwright-report/
+coverage/
+prisma/schema.generated.prisma
+prisma/*.db
+prisma/*.db-journal

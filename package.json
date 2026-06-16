@@ -6,10 +6,21 @@
     "dev": "next dev --hostname 0.0.0.0 --port 3005",
     "dev:docker": "next dev --hostname 0.0.0.0 --port 80",
     "build": "next build",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "audit:check": "npm audit --audit-level=high",
     "start": "next start --port 80",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:sqlite": "npm run db:test:reset && DATABASE_URL=file:./test-e2e.db RUN_DB_E2E=1 MONEY_AUTH_MODE=local MONEY_DEV_MCP_TOKEN=dev-money-token npm run test:e2e",
     "typecheck": "tsc --noEmit",
-    "prisma:generate": "prisma generate",
-    "db:deploy": "prisma db push",
+    "prisma:generate": "RUST_LOG=info node scripts/prisma.mjs generate",
+    "prisma:validate": "DATABASE_URL=${DATABASE_URL:-mysql://user:password@localhost:3306/money} RUST_LOG=info node scripts/prisma.mjs validate",
+    "db:deploy": "RUST_LOG=info node scripts/prisma.mjs db push",
+    "db:test:reset": "rm -f prisma/test-e2e.db prisma/test-e2e.db-journal && DATABASE_URL=file:./test-e2e.db npm run prisma:generate && DATABASE_URL=file:./test-e2e.db npm run db:deploy",
     "db:seed": "node prisma/seed.mjs"
   },
   "dependencies": {
@@ -23,13 +34,20 @@
     "mantine-datatable": "^9.3.0",
     "next": "^16.0.7",
     "react": "^19.2.1",
-    "react-dom": "^19.2.1"
+    "react-dom": "^19.2.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "@types/node": "^22.13.14",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^4.1.9",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.9",
+    "prettier": "^3.8.4",
     "prisma": "^6.19.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.9"
   }
 }

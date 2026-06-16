@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 
-import { addEventClient } from '../../lib/events';
+import { addEventClient } from '@/server/events';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

@@ -6,7 +6,7 @@ on:
     branches:
       - main
     tags:
-      - "v*"
+      - 'v*'
 
 permissions:
   contents: read
@@ -19,6 +19,21 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: money
+          MYSQL_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: root-password
+          MYSQL_USER: user
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -proot-password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
 
     steps:
       - name: Checkout
@@ -27,7 +42,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
@@ -38,6 +53,37 @@ jobs:
         env:
           DATABASE_URL: mysql://user:password@localhost:3306/money
 
+      - name: Validate Prisma schema
+        run: npm run prisma:validate
+        env:
+          DATABASE_URL: mysql://user:password@localhost:3306/money
+
+      - name: Sync MySQL schema
+        run: npm run db:deploy
+        env:
+          DATABASE_URL: mysql://user:password@127.0.0.1:3306/money
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Dependency audit
+        run: npm run audit:check
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+
+      - name: Lint
+        run: npm run lint
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -45,6 +91,18 @@ jobs:
         run: npm run build
         env:
           DATABASE_URL: mysql://user:password@localhost:3306/money
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Critical flow tests
+        run: npm run test:e2e
+        env:
+          DATABASE_URL: mysql://user:password@localhost:3306/money
+          MONEY_AUTH_MODE: local
+
+      - name: SQLite real database e2e
+        run: npm run test:e2e:sqlite
 
   docker:
     name: Docker

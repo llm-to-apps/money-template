@@ -138,6 +138,8 @@ Rules:
 - Reports should support grouping by top-level category and by exact
   subcategory.
 - Transaction forms should make parent/subcategory selection fast on mobile.
+- Transaction lists should use cursor-based incremental loading so large
+  histories are not fetched into the browser at once.
 
 ### Dashboard
 
@@ -220,8 +222,9 @@ store money as floating point values.
 
 Client JSON APIs should exist for core app workflows:
 
-- list dashboard snapshot
+- fetch dashboard snapshot through `/api/dashboard`
 - list transactions with filters and limit
+- list transactions with cursor pagination for large histories
 - create transaction
 - update transaction
 - delete transaction
@@ -235,6 +238,46 @@ Client JSON APIs should exist for core app workflows:
 - archive category
 
 Mutations should notify realtime listeners after successful writes.
+
+## Engineering Contract
+
+Money uses the same baseline practices expected for new OS7 Next.js apps:
+
+- App Router only, with `app/` kept as route and adapter code.
+- Feature modules under `src/features/<feature>/` with schema parsing and
+  business services close to the feature.
+- Shared framework-neutral contracts under `src/shared/`, including schema
+  helpers and `AppResult` / `AppError`.
+- Server-only infrastructure under `src/server/`, split by responsibility:
+  database, auth, env, events, filters, resolvers, serializers, and snapshots.
+- MySQL and SQLite database providers, selected by `DATABASE_URL` or explicit
+  `DATABASE_PROVIDER`.
+- Typed MCP tools under `src/mcp/`, exposed through a thin route adapter.
+- Path aliases for `@/features`, `@/server`, `@/shared`, and `@/mcp`.
+- Zod-backed runtime parsing for route, service, and MCP inputs.
+- Standard HTTP error mapping through the shared result contract.
+
+Required checks before merging structural or API changes:
+
+- `npm run format:check`
+- `npm run prisma:validate`
+- `npm run test`
+- `npm run lint`
+- `npm run typecheck`
+- `npm run build`
+- `MONEY_AUTH_MODE=local npm run test:e2e`
+
+Database-backed CRUD browser flows should live in Playwright behind
+`RUN_DB_E2E=1` so the template remains runnable without a local database while
+still keeping real create/update flows close at hand.
+
+SQLite-backed CRUD browser, JSON API, and MCP flows should be runnable with
+`npm run test:e2e:sqlite` for service-free local and CI verification. MySQL
+remains the production-compatible provider and should be schema-synced in CI.
+
+Coverage must be measured with `npm run test:coverage` and enforced with
+explicit thresholds. Start with practical thresholds that pass on real tests and
+raise them as service and route coverage improves.
 
 ## MCP Requirements
 
@@ -255,6 +298,7 @@ MCP list/search tools must:
 
 - have compact default limits
 - enforce maximum limits
+- support cursor pagination for large transaction histories
 - support clear filters
 - return business objects, not UI strings
 - avoid dumping unbounded datasets into the LLM context
@@ -289,6 +333,11 @@ The app is ready for a feature milestone when:
 - matching MCP CRUD exists for the same business entities
 - dashboard summaries match transaction data
 - mobile and desktop layouts are verified
+- API/service integration tests cover risky mutations and error mapping
+- Playwright critical flow tests cover health and anonymous/signed-out routes
+- real-database Playwright tests cover browser, JSON API, and MCP mutation flows
+- CI runs format, unit/integration tests, lint, typecheck, build, Prisma
+  validation, coverage, MySQL schema sync, and critical Playwright flows
 - `npm run typecheck` passes
 - `npm run build` passes
 - Prisma schema sync and seed data work from a clean database

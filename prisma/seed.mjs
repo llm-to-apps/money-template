@@ -64,8 +64,8 @@ async function upsertCategoryPath(path, data = {}) {
       ? await prisma.category.update({
           where: { id: existing.id },
           data: {
-            color: isLeaf ? data.color ?? existing.color : existing.color,
-            scope: isLeaf ? data.scope ?? existing.scope : CategoryScope.BOTH,
+            color: isLeaf ? (data.color ?? existing.color) : existing.color,
+            scope: isLeaf ? (data.scope ?? existing.scope) : CategoryScope.BOTH,
             status: RecordStatus.ACTIVE
           }
         })
@@ -73,8 +73,10 @@ async function upsertCategoryPath(path, data = {}) {
           data: {
             name,
             parentId,
-            color: isLeaf ? data.color ?? '#059669' : '#64748b',
-            scope: isLeaf ? data.scope ?? CategoryScope.BOTH : CategoryScope.BOTH
+            color: isLeaf ? (data.color ?? '#059669') : '#64748b',
+            scope: isLeaf
+              ? (data.scope ?? CategoryScope.BOTH)
+              : CategoryScope.BOTH
           }
         });
     parentId = category.id;
@@ -106,30 +108,6 @@ function monthlyAmount(base, monthOffset, variance = 0) {
 async function main() {
   const walletByName = new Map();
   const categoryByPath = new Map();
-  const legacyWallet = await prisma.wallet.findUnique({
-    where: { id: 'local-default-wallet' }
-  });
-  const bdCardSeed = wallets[0];
-
-  if (legacyWallet && legacyWallet.name !== bdCardSeed.name) {
-    const existingBdCard = await prisma.wallet.findUnique({
-      where: { name: bdCardSeed.name }
-    });
-
-    if (!existingBdCard) {
-      await prisma.wallet.update({
-        where: { id: legacyWallet.id },
-        data: {
-          name: bdCardSeed.name,
-          comment: bdCardSeed.comment,
-          color: bdCardSeed.color,
-          currency: bdCardSeed.currency,
-          initialBalanceCents: bdCardSeed.initialBalanceCents,
-          status: RecordStatus.ACTIVE
-        }
-      });
-    }
-  }
 
   for (const wallet of wallets) {
     const savedWallet = await prisma.wallet.upsert({

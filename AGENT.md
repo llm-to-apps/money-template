@@ -28,7 +28,16 @@ The platform agent uses this endpoint in Use mode. If a user-facing data action 
 When adding or changing Prisma models:
 
 - Update `prisma/schema.prisma`.
-- Add or update the related application code.
+- Add or update the related feature module under `src/features/<feature>/`.
+- Keep validation and input parsing in `src/features/<feature>/schemas.ts`.
+- Use shared Zod-backed helpers from `src/shared/schema.ts` for runtime parsing.
+- Keep business operations, Prisma writes, serialization, and realtime mutation
+  notifications in `src/features/<feature>/service.ts`.
+- Keep API route handlers thin: auth, request parsing, service call, response.
+- Use `@/features`, `@/server`, `@/shared`, and `@/mcp` path aliases instead of
+  long relative imports.
+- Use `src/shared/result.ts` for HTTP error mapping instead of custom per-route
+  error envelopes.
 - Add MCP tools for user-facing business operations around the model.
 - Update seed data only when useful for a fresh demo app.
 - Keep relations explicit and use sensible delete behavior.
@@ -48,8 +57,10 @@ MCP tools live in `app/api/mcp/route.ts`.
 For every MCP tool:
 
 - Add a clear tool name and description.
-- Define an input schema in the tools list.
-- Validate arguments in the handler.
+- Define the input schema in the related feature `schemas.ts` file and reuse it
+  in the tools list.
+- Validate and parse arguments through the feature schema/service layer.
+- Execute business operations through the related feature service.
 - Return business objects, not UI strings.
 - Do not expose secrets or raw environment values.
 - If the tool mutates data, notify realtime listeners.
@@ -100,6 +111,9 @@ After code changes, run the most relevant checks available in the container.
 Prefer:
 
 - `npm run prisma:generate` after Prisma schema changes
+- `npm run prisma:validate`
+- `npm run test`
+- `MONEY_AUTH_MODE=local npm run test:e2e` after UI/app shell changes
 - `npm run typecheck`
 - `npm run build` when the change affects routing or production behavior
 

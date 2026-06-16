@@ -12,7 +12,11 @@ export const metadata: Metadata = {
   title: 'Money',
   description: 'Personal money tracker.',
   icons: {
-    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }]
+    apple: '/apple-touch-icon.png',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-512.png', sizes: '512x512', type: 'image/png' }
+    ]
   }
 };
 
