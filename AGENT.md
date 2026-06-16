@@ -42,8 +42,10 @@ When adding or changing Prisma models:
 - Update seed data only when useful for a fresh demo app.
 - Keep relations explicit and use sensible delete behavior.
 - Do not hide missing required tables or columns with UI fallbacks. Fix the schema, generated Prisma client, and seed path instead.
-- Keep this template migration-free. For a fresh local or deployed database,
-  `npm run db:deploy` pushes the current Prisma schema directly.
+- Keep production schema changes migration-backed. For MySQL, create Prisma
+  migrations and apply them with `npm run db:deploy`.
+- SQLite remains a local/e2e convenience provider and uses `npm run db:push`
+  through the test reset scripts.
 
 Examples:
 
@@ -120,7 +122,8 @@ Prefer:
 After Prisma schema changes:
 
 - Run `npm run prisma:generate`.
-- Run `npm run db:deploy` against the intended development database.
+- Run `npm run db:deploy` against MySQL, or `npm run db:push` for SQLite local
+  test databases.
 - Run `npm run typecheck`.
 - Restart the supervised app process.
 - Inspect app status and logs.

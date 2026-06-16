@@ -113,8 +113,8 @@
 - [x] Add GitHub Actions workflow.
 - [x] Run install, Prisma generate, Prisma validate, format check, audit check,
       tests, coverage, lint, typecheck, build, and Playwright.
-- [x] Add MySQL service for schema sync.
-- [x] Run MySQL schema sync in CI.
+- [x] Add MySQL service for migration verification.
+- [x] Run MySQL migrations in CI.
 - [x] Run SQLite real database e2e in CI.
 - [x] Upload coverage artifact.
 - [ ] Add optional MySQL-backed integration/e2e job if provider-specific
@@ -139,9 +139,8 @@
 - [x] Add SQLite support for local and e2e workflows.
 - [x] Add generated Prisma schema wrapper.
 - [x] Add `AuditEvent` model.
-- [x] Keep template migration-free with `prisma db push`.
-- [ ] Add migrations if the app graduates from template/prototype mode to a
-      long-lived production app with historical schema changes.
+- [x] Add production MySQL Prisma migrations.
+- [x] Keep SQLite local/e2e reset on `prisma db push`.
 
 ## Documentation
 

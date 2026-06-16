@@ -98,8 +98,12 @@ npm run db:deploy
 npm run db:seed
 ```
 
-Database-backed Playwright CRUD flows are available when a migrated local
-database is configured:
+`npm run db:deploy` applies production MySQL migrations. SQLite local/e2e
+databases use `npm run db:push` through reset scripts so they stay service-free
+and fast.
+
+Database-backed Playwright CRUD flows are available when a local database is
+configured:
 
 ```bash
 RUN_DB_E2E=1 MONEY_AUTH_MODE=local npm run test:e2e

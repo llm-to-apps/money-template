@@ -19,8 +19,9 @@
     "typecheck": "tsc --noEmit",
     "prisma:generate": "RUST_LOG=info node scripts/prisma.mjs generate",
     "prisma:validate": "DATABASE_URL=${DATABASE_URL:-mysql://user:password@localhost:3306/money} RUST_LOG=info node scripts/prisma.mjs validate",
-    "db:deploy": "RUST_LOG=info node scripts/prisma.mjs db push",
-    "db:test:reset": "rm -f prisma/test-e2e.db prisma/test-e2e.db-journal && DATABASE_URL=file:./test-e2e.db npm run prisma:generate && DATABASE_URL=file:./test-e2e.db npm run db:deploy",
+    "db:deploy": "RUST_LOG=info node scripts/prisma.mjs migrate deploy",
+    "db:push": "RUST_LOG=info node scripts/prisma.mjs db push",
+    "db:test:reset": "rm -f prisma/test-e2e.db prisma/test-e2e.db-journal && DATABASE_URL=file:./test-e2e.db npm run prisma:generate && DATABASE_URL=file:./test-e2e.db npm run db:push",
     "db:seed": "node prisma/seed.mjs"
   },
   "dependencies": {

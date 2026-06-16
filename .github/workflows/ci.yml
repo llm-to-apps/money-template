@@ -58,7 +58,7 @@ jobs:
         env:
           DATABASE_URL: mysql://user:password@localhost:3306/money
 
-      - name: Sync MySQL schema
+      - name: Apply MySQL migrations
         run: npm run db:deploy
         env:
           DATABASE_URL: mysql://user:password@127.0.0.1:3306/money

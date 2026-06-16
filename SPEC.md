@@ -252,6 +252,10 @@ Money uses the same baseline practices expected for new OS7 Next.js apps:
   database, auth, env, events, filters, resolvers, serializers, and snapshots.
 - MySQL and SQLite database providers, selected by `DATABASE_URL` or explicit
   `DATABASE_PROVIDER`.
+- Production MySQL schema changes are represented as Prisma migrations and
+  applied with `npm run db:deploy`.
+- SQLite is kept for local and e2e workflows through `npm run db:push`, not
+  production migrations.
 - Typed MCP tools under `src/mcp/`, exposed through a thin route adapter.
 - Path aliases for `@/features`, `@/server`, `@/shared`, and `@/mcp`.
 - Zod-backed runtime parsing for route, service, and MCP inputs.
@@ -273,7 +277,8 @@ still keeping real create/update flows close at hand.
 
 SQLite-backed CRUD browser, JSON API, and MCP flows should be runnable with
 `npm run test:e2e:sqlite` for service-free local and CI verification. MySQL
-remains the production-compatible provider and should be schema-synced in CI.
+remains the production-compatible provider and should apply Prisma migrations in
+CI.
 
 Coverage must be measured with `npm run test:coverage` and enforced with
 explicit thresholds. Start with practical thresholds that pass on real tests and
@@ -337,10 +342,10 @@ The app is ready for a feature milestone when:
 - Playwright critical flow tests cover health and anonymous/signed-out routes
 - real-database Playwright tests cover browser, JSON API, and MCP mutation flows
 - CI runs format, unit/integration tests, lint, typecheck, build, Prisma
-  validation, coverage, MySQL schema sync, and critical Playwright flows
+  validation, coverage, MySQL migrations, and critical Playwright flows
 - `npm run typecheck` passes
 - `npm run build` passes
-- Prisma schema sync and seed data work from a clean database
+- Prisma migrations and seed data work from a clean MySQL database
 
 ## Open Questions
 
