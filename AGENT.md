@@ -23,6 +23,31 @@ Keep business operations explicit and exposed through the application MCP endpoi
 
 The platform agent uses this endpoint in Use mode. If a user-facing data action exists in the UI or database, the same action should usually be available as an MCP tool.
 
+## Engineering Contract
+
+Money follows the baseline engineering practices expected for OS7 apps built by
+AI agents.
+
+- Use Next.js App Router only.
+- Keep `app/` as route, layout, provider, route boundary, and API adapter code.
+- Keep business feature modules under `src/features/<feature>/`.
+- Keep server-only infrastructure under `src/server/`.
+- Keep framework-neutral types, schema helpers, result contracts, and pure
+  utilities under `src/shared/`.
+- Keep typed MCP registry and tool definitions under `src/mcp/`.
+- Use `@/features`, `@/server`, `@/shared`, and `@/mcp` path aliases instead of
+  long relative imports.
+- Use typed runtime validation for route, service, and MCP inputs.
+- Use `src/shared/result.ts` and typed `AppException` / `AppError` contracts for
+  HTTP error mapping.
+- Do not use misleading collection names. A bounded page of transactions must be
+  named like `initialTransactionsPage`, not `transactions`.
+- Large lists must be bounded and cursor-paginated before they can grow without
+  limit.
+- API routes should be thin adapters: auth, request parsing, service call,
+  audit/realtime wiring, and response.
+- UI, API, and MCP paths should reuse the same feature service layer.
+
 ## Database Rules
 
 When adding or changing Prisma models:
@@ -46,6 +71,10 @@ When adding or changing Prisma models:
   migrations and apply them with `npm run db:deploy`.
 - SQLite remains a local/e2e convenience provider and uses `npm run db:push`
   through the test reset scripts.
+- CI should apply MySQL migrations, not `prisma db push`, for the production
+  provider.
+- SQLite-backed e2e should stay service-free and reset through
+  `npm run db:test:reset`.
 
 Examples:
 
@@ -84,11 +113,11 @@ When adding a mutating MCP action or server action:
 
 Keep the first screen as the actual money dashboard.
 
-Money uses Mantine as the UI framework. Prefer Mantine components directly from
-`@mantine/core` and `@mantine/hooks` instead of building local component
-wrappers. Do not reintroduce Tailwind, shadcn/ui, Radix wrapper components, or a
-custom local UI kit for ordinary controls, tables, modals, menus, layout, or
-forms.
+Money uses Mantine and the OS7 UI kit as its UI foundation. Prefer OS7 UI kit
+brand/theme helpers and Mantine components directly from `@mantine/core` and
+`@mantine/hooks` instead of building local component wrappers. Do not reintroduce
+Tailwind, shadcn/ui, Radix wrapper components, or a custom local UI kit for
+ordinary controls, tables, modals, menus, layout, or forms.
 
 Always check for an existing Mantine or official Mantine-compatible component
 before implementing UI behavior locally. Standard controls and patterns such as
@@ -112,12 +141,19 @@ After code changes, run the most relevant checks available in the container.
 
 Prefer:
 
+- `npm run format:check`
 - `npm run prisma:generate` after Prisma schema changes
 - `npm run prisma:validate`
 - `npm run test`
+- `npm run test:coverage` when changing services, routes, or shared contracts
+- `npm run lint`
 - `MONEY_AUTH_MODE=local npm run test:e2e` after UI/app shell changes
+- `npm run test:e2e:sqlite` after changes to real database UI/API/MCP flows
 - `npm run typecheck`
 - `npm run build` when the change affects routing or production behavior
+
+Coverage is enforced with practical baseline thresholds. Raise thresholds only
+after adding meaningful tests that keep the app easy to maintain.
 
 After Prisma schema changes:
 

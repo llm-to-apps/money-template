@@ -23,17 +23,6 @@ client application while staying simple enough for agents to safely extend.
 
 ## UX Principles
 
-- Money uses Mantine as its UI framework. Use Mantine components and default
-  behavior before adding custom CSS or local UI abstractions.
-- Always use ready-made framework components for standard UI patterns. Forms,
-  date pickers, selects, tables, modals, menus, drawers, notifications, layout,
-  and navigation should come from Mantine or official Mantine-compatible
-  packages before any local implementation is considered.
-- Custom UI code is allowed only when the framework has no suitable component or
-  when product behavior cannot be composed from existing Mantine primitives. In
-  that case, keep the custom layer small and document why it exists.
-- Tailwind, shadcn/ui, and custom local UI-kit controls are not part of the Money
-  implementation.
 - Mobile-first is mandatory. Every core workflow must work on narrow mobile
   viewports before desktop polish is considered complete.
 - The first screen is the usable finance dashboard, not a marketing or landing
@@ -206,23 +195,22 @@ Target entities:
 - TransactionTag
 - ImportJob
 
-Minimum next schema expansion:
+Core model rules:
 
-- Add `Wallet`.
-- Add `walletId` to `Transaction`.
-- Add `parentId` to `Category`.
-- Add archive fields to `Wallet` and `Category`.
-- Add indexes for `walletId`, `parentId`, `occurredAt`, `type`, and common
-  filtered queries.
+- Transactions belong to one wallet and one category.
+- Categories can have parent categories.
+- Wallets and categories can be archived without deleting historical data.
+- Transaction history must remain queryable by date, wallet, category, type,
+  amount, and text.
 
 Money amounts must be stored as integers in minor units, such as cents. Do not
 store money as floating point values.
 
-## API Requirements
+## App Interfaces
 
-Client JSON APIs should exist for core app workflows:
+Money should expose application capabilities for core workflows:
 
-- fetch dashboard snapshot through `/api/dashboard`
+- fetch dashboard data
 - list transactions with filters and limit
 - list transactions with cursor pagination for large histories
 - create transaction
@@ -239,56 +227,9 @@ Client JSON APIs should exist for core app workflows:
 
 Mutations should notify realtime listeners after successful writes.
 
-## Engineering Contract
-
-Money uses the same baseline practices expected for new OS7 Next.js apps:
-
-- App Router only, with `app/` kept as route and adapter code.
-- Feature modules under `src/features/<feature>/` with schema parsing and
-  business services close to the feature.
-- Shared framework-neutral contracts under `src/shared/`, including schema
-  helpers and `AppResult` / `AppError`.
-- Server-only infrastructure under `src/server/`, split by responsibility:
-  database, auth, env, events, filters, resolvers, serializers, and snapshots.
-- MySQL and SQLite database providers, selected by `DATABASE_URL` or explicit
-  `DATABASE_PROVIDER`.
-- Production MySQL schema changes are represented as Prisma migrations and
-  applied with `npm run db:deploy`.
-- SQLite is kept for local and e2e workflows through `npm run db:push`, not
-  production migrations.
-- Typed MCP tools under `src/mcp/`, exposed through a thin route adapter.
-- Path aliases for `@/features`, `@/server`, `@/shared`, and `@/mcp`.
-- Zod-backed runtime parsing for route, service, and MCP inputs.
-- Standard HTTP error mapping through the shared result contract.
-
-Required checks before merging structural or API changes:
-
-- `npm run format:check`
-- `npm run prisma:validate`
-- `npm run test`
-- `npm run lint`
-- `npm run typecheck`
-- `npm run build`
-- `MONEY_AUTH_MODE=local npm run test:e2e`
-
-Database-backed CRUD browser flows should live in Playwright behind
-`RUN_DB_E2E=1` so the template remains runnable without a local database while
-still keeping real create/update flows close at hand.
-
-SQLite-backed CRUD browser, JSON API, and MCP flows should be runnable with
-`npm run test:e2e:sqlite` for service-free local and CI verification. MySQL
-remains the production-compatible provider and should apply Prisma migrations in
-CI.
-
-Coverage must be measured with `npm run test:coverage` and enforced with
-explicit thresholds. Start with practical thresholds that pass on real tests and
-raise them as service and route coverage improves.
-
 ## MCP Requirements
 
-Money must expose business operations through:
-
-- `POST /api/mcp`
+Money must expose business operations to OS7 agents.
 
 MCP should cover maximum practical CRUD for all user-facing business data:
 
@@ -319,17 +260,6 @@ Required transaction filters:
 - amount range
 - text query
 
-## Local Development
-
-Local development should be convenient:
-
-- `npm run dev` runs on port `3005`
-- Docker or platform runtime may run on port `80`
-- local auth mode can bypass OS7 OAuth
-- local MySQL can be configured through `DATABASE_URL`
-- seed data should include wallets, hierarchical categories, and transactions
-  that exercise dashboard charts
-
 ## Acceptance Criteria
 
 The app is ready for a feature milestone when:
@@ -338,14 +268,9 @@ The app is ready for a feature milestone when:
 - matching MCP CRUD exists for the same business entities
 - dashboard summaries match transaction data
 - mobile and desktop layouts are verified
-- API/service integration tests cover risky mutations and error mapping
-- Playwright critical flow tests cover health and anonymous/signed-out routes
-- real-database Playwright tests cover browser, JSON API, and MCP mutation flows
-- CI runs format, unit/integration tests, lint, typecheck, build, Prisma
-  validation, coverage, MySQL migrations, and critical Playwright flows
-- `npm run typecheck` passes
-- `npm run build` passes
-- Prisma migrations and seed data work from a clean MySQL database
+- seeded demo data includes wallets, hierarchical categories, and transactions
+  that exercise dashboard charts
+- large transaction histories remain usable through bounded incremental loading
 
 ## Open Questions
 
