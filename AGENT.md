@@ -28,12 +28,13 @@ The platform agent uses this endpoint in Use mode. If a user-facing data action 
 When adding or changing Prisma models:
 
 - Update `prisma/schema.prisma`.
-- Add a migration SQL file under `prisma/migrations`.
 - Add or update the related application code.
 - Add MCP tools for user-facing business operations around the model.
 - Update seed data only when useful for a fresh demo app.
 - Keep relations explicit and use sensible delete behavior.
-- Do not hide missing required tables or columns with UI fallbacks. Fix the schema, migration, generated Prisma client, and seed path instead.
+- Do not hide missing required tables or columns with UI fallbacks. Fix the schema, generated Prisma client, and seed path instead.
+- Keep this template migration-free. For a fresh local or deployed database,
+  `npm run db:deploy` pushes the current Prisma schema directly.
 
 Examples:
 
@@ -105,6 +106,7 @@ Prefer:
 After Prisma schema changes:
 
 - Run `npm run prisma:generate`.
+- Run `npm run db:deploy` against the intended development database.
 - Run `npm run typecheck`.
 - Restart the supervised app process.
 - Inspect app status and logs.

@@ -291,7 +291,7 @@ The app is ready for a feature milestone when:
 - mobile and desktop layouts are verified
 - `npm run typecheck` passes
 - `npm run build` passes
-- Prisma migrations and seed data work from a clean database
+- Prisma schema sync and seed data work from a clean database
 
 ## Open Questions
 
