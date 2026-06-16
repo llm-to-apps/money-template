@@ -8,6 +8,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
+COPY scripts ./scripts
 RUN npm ci
 RUN npm run prisma:generate
 
@@ -29,13 +30,17 @@ ENV APP_COMMAND="npm run dev:docker"
 
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
+COPY scripts ./scripts
 RUN npm ci
 RUN npm run prisma:generate
 
 COPY app ./app
 COPY public ./public
+COPY src ./src
+COPY ui-kit ./ui-kit
 COPY next.config.ts ./next.config.ts
-COPY AGENT.md README.md tsconfig.json .gitignore ./
+COPY next-env.d.ts tsconfig.json ./
+COPY AGENT.md README.md .gitignore ./
 
 EXPOSE 80 7070
 
