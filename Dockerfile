@@ -39,7 +39,7 @@ COPY public ./public
 COPY src ./src
 COPY ui-kit ./ui-kit
 COPY next.config.ts ./next.config.ts
-COPY next-env.d.ts tsconfig.json ./
+COPY tsconfig.json ./
 COPY AGENT.md README.md .gitignore ./
 
 EXPOSE 80 7070
