@@ -3,6 +3,137 @@
 This file contains project-specific rules for coding agents working on Money.
 Read it before making code, database, MCP, or UI changes.
 
+## Default Agent Mode
+
+Most project-agent requests against Money are small targeted edits: add a field,
+change a label, adjust a color, fix one form, tweak validation, or expose a
+simple data operation. Prefer the smallest safe change that satisfies the user
+request.
+
+Do not start routine work by mapping the whole codebase. First inspect only the
+files directly related to the requested UI, API route, Prisma model, MCP tool,
+or feature service. Broaden the search only when those files do not explain the
+behavior.
+
+For small changes:
+
+1. Locate the likely feature, route, schema, or component.
+2. Read the smallest surrounding context needed.
+3. Edit in the existing style.
+4. Run the narrowest relevant check.
+5. Report what changed and what was verified.
+
+Avoid unrelated refactors, architecture rewrites, generated-file churn, and
+large exploratory edits unless the user explicitly asks. Slow down and broaden
+analysis for auth, OAuth, permissions, billing/credits, deployment, background
+jobs, shared framework code, destructive migrations, or failures that suggest
+cross-module coupling.
+
+## Common Places
+
+- App routes, layouts, route boundaries, and API adapters: `app/`
+- Public JSON route handlers: `app/api/**/route.ts`
+- MCP endpoint adapter: `app/api/mcp/route.ts`
+- Prisma schema and migrations: `prisma/schema.prisma`,
+  `prisma/migrations/`
+- Seed data: `prisma/seed.ts`
+- Money feature modules: `src/features/`
+- Feature validation schemas: `src/features/<feature>/schemas.ts`
+- Feature business logic and Prisma writes: `src/features/<feature>/service.ts`
+- Shared API/result contracts: `src/shared/api.ts`, `src/shared/result.ts`
+- Shared schema parsing helpers: `src/shared/schema.ts`
+- HTTP response helpers: `src/server/http.ts`
+- Server infrastructure, auth, env, db, logging, audit, and realtime helpers:
+  `src/server/`
+- Typed MCP registry and tool definitions: `src/mcp/`
+- App shell and client providers: `app/layout.tsx`, `app/page.tsx`,
+  `app/providers.tsx`
+- Global and theme styling: `app/globals.css`, `src/theme/`, `src/ui/`
+- Tests: colocated `*.test.ts`, Playwright specs under `tests/` or `e2e/`
+- E2E SQLite reset path: `npm run test:e2e:sqlite`
+
+## Project Map
+
+Money is organized around thin route adapters, feature modules, shared
+contracts, and server-only infrastructure. Use this map before doing broad
+searches.
+
+- `app/` is the Next.js App Router surface. It contains route segments, layouts,
+  route boundaries, providers, pages, and thin route handlers.
+- `app/api/**/route.ts` files are HTTP API entry points. Keep them thin: auth,
+  request parsing, service call, and `jsonOk` / `jsonError` response mapping.
+- `app/api/mcp/route.ts` is the MCP JSON-RPC endpoint for agent-facing tools.
+- `prisma/schema.prisma` is the source of truth for database models.
+- `prisma/migrations/` contains production MySQL migrations.
+- `prisma/seed.ts` seeds fresh local/demo data.
+- `src/features/<feature>/schemas.ts` owns Zod schemas and shared input parsing
+  for UI, API, and MCP.
+- `src/features/<feature>/service.ts` owns business operations, Prisma writes,
+  serialization, audit events, and realtime notifications.
+- `src/shared/api.ts` owns public API DTOs and `ApiResponse<T>` shapes.
+- `src/shared/result.ts` owns framework-neutral app result/error contracts.
+- `src/shared/schema.ts` owns reusable runtime parsing helpers.
+- `src/server/http.ts` maps app results/errors to Next JSON responses.
+- `src/server/` contains server-only infrastructure such as auth, db, env,
+  logging, audit, OAuth, realtime, and integrations.
+- `src/mcp/` contains typed MCP tool registries and shared MCP wiring.
+- `app/globals.css`, `src/theme/`, and `src/ui/` are the first places to check
+  for global styling, theme, and shared UI primitives.
+
+## Task Shortcuts
+
+For adding or changing a transaction field:
+
+1. Update `prisma/schema.prisma`.
+2. Add a Prisma migration for MySQL.
+3. Update the relevant feature schema in `src/features/<feature>/schemas.ts`.
+4. Update service writes, queries, and serialization in
+   `src/features/<feature>/service.ts`.
+5. Update the form, table, card, detail view, filters, or summaries that show
+   the field.
+6. Update MCP input/output when the field is user-visible.
+7. Run `npm run prisma:generate`, `npm run db:deploy`, and `npm run typecheck`.
+
+For changing dashboard UI:
+
+1. Start with `app/page.tsx` and the dashboard-related feature components.
+2. Check client data fetch hooks only if the displayed data shape changes.
+3. Prefer Mantine and OS7 UI kit primitives before adding custom CSS.
+4. Verify mobile and desktop layouts for visible UI changes.
+
+For adding a simple CRUD model:
+
+1. Update `prisma/schema.prisma` and add a migration.
+2. Add or update `src/features/<feature>/schemas.ts`.
+3. Add or update `src/features/<feature>/service.ts`.
+4. Add thin API route adapters under `app/api/**/route.ts` if browser HTTP
+   access is needed.
+5. Add MCP tools for user-facing create/read/update/delete operations.
+6. Add compact UI only where users directly manage the model.
+
+For API response changes:
+
+1. Start at the relevant `app/api/**/route.ts` adapter.
+2. Keep public JSON responses on `ApiResponse<T>`.
+3. Use `jsonOk`, `jsonError`, and `jsonErrorFromUnknown` from
+   `src/server/http.ts`.
+4. Keep DTOs in `src/shared/api.ts` or feature-local shared types when narrower.
+
+For MCP behavior changes:
+
+1. Start at `app/api/mcp/route.ts` and the related `src/mcp/` registry.
+2. Reuse feature schemas from `src/features/<feature>/schemas.ts`.
+3. Execute mutations through `src/features/<feature>/service.ts`.
+4. Ensure mutating tools publish the same realtime invalidation as UI/API
+   mutations.
+
+For auth, OAuth, or session changes:
+
+1. Slow down and inspect the relevant files under `src/server/auth`,
+   `src/server/oauth`, and auth/OAuth route handlers.
+2. Check redirects, cookies, callback URLs, and safe error handling.
+3. Do not make broad auth changes without targeted verification.
+
 ## Product Shape
 
 Money is a personal finance app backed by MySQL and Prisma.
