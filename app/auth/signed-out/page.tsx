@@ -35,6 +35,8 @@ export default function SignedOutPage() {
             component="a"
             href="/api/auth/login?interactive=1"
             aria-label={isLocalAuth ? 'Continue as local' : 'Continue with OS7'}
+            color="dark"
+            variant="default"
           >
             {isLocalAuth ? 'Continue as Local' : <Os7Logo w={62} />}
           </Button>
