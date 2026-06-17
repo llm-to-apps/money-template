@@ -19,20 +19,22 @@ COPY --from=agent-tools /usr/local/bin/agent-tools /usr/local/bin/agent-tools
 
 WORKDIR /workspace
 
-ENV NODE_ENV=development
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=80
 ENV HOSTNAME=0.0.0.0
 ENV AGENT_WORKDIR=/workspace
 ENV AGENT_TOOLS_PORT=7070
+ENV APP_RESTORE_COMMAND="npm install --include=dev"
 ENV APP_STARTUP_COMMANDS="npm run prisma:generate && npm run db:deploy && npm run db:seed"
-ENV APP_COMMAND="npm run dev:docker"
+ENV APP_COMMAND="npm run build && npm run start"
 
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
 COPY scripts ./scripts
 RUN npm ci
 RUN npm run prisma:generate
+
+ENV NODE_ENV=production
 
 COPY app ./app
 COPY public ./public
