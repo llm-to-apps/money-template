@@ -1,4 +1,4 @@
-ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-1d69c45
+ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-8b6fe99
 
 FROM ${AGENT_TOOLS_IMAGE} AS agent-tools
 
