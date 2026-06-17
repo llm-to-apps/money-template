@@ -13,6 +13,13 @@
     "remote": "git@github.com:llm-to-apps/money-template.git",
     "path": "templates/money"
   },
+  "updates": {
+    "github": {
+      "repository": "llm-to-apps/money-template",
+      "ref": "main",
+      "path": "manifest.json"
+    }
+  },
   "git": {
     "mount": {
       "target": "/workspace",
