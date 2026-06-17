@@ -1,5 +1,5 @@
 import { dashboardPayload } from '@/server/route-helpers';
-import { jsonOk } from '@/shared/result';
+import { jsonOk } from '@/server/http';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

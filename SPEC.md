@@ -242,11 +242,11 @@ Public JSON HTTP APIs must use one response envelope:
 - success: `{ ok: true, data: T }`
 - error: `{ ok: false, error: { code, message, details? } }`
 
-The shared TypeScript contract is `ApiResponse<T>` in `src/shared/result.ts`.
-Public API routes should use shared response helpers instead of mixing raw
-success DTOs with enveloped errors. OAuth redirects, form redirects, SSE event
-streams, and MCP JSON-RPC are explicit exceptions because those routes have
-their own protocol contracts.
+The shared TypeScript contract is `ApiResponse<T>` in `src/shared/api.ts`.
+Public API routes should use response helpers from `src/server/http.ts` instead
+of mixing raw success DTOs with enveloped errors. OAuth redirects, form
+redirects, SSE event streams, and MCP JSON-RPC are explicit exceptions because
+those routes have their own protocol contracts.
 
 ## MCP Requirements
 

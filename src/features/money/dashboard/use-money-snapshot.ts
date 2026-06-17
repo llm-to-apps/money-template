@@ -14,7 +14,7 @@ import type {
   MoneySnapshot,
   MoneyUser
 } from '@/shared/money-types';
-import type { ApiResponse } from '@/shared/result';
+import type { ApiResponse } from '@/shared/api';
 
 export function useMoneySnapshot({ initialUser }: { initialUser: MoneyUser }) {
   const [snapshot, setSnapshot] = useState<MoneySnapshot | null>(null);

@@ -1,4 +1,4 @@
-import { jsonOk } from '@/shared/result';
+import { jsonOk } from '@/server/http';
 
 export function GET() {
   return jsonOk({

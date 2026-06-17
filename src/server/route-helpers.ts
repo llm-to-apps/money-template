@@ -4,7 +4,7 @@ import { getCurrentUser, isManuallyLoggedOut } from '@/server/auth';
 import { getMoneySnapshot } from '@/server/money';
 import { type AuditAction, auditMoneyMutation } from '@/server/audit';
 import { authorizeMoneyMutation } from '@/server/mutation-guard';
-import { jsonError, jsonErrorFromUnknown, jsonOk } from '@/shared/result';
+import { jsonError, jsonErrorFromUnknown, jsonOk } from '@/server/http';
 
 export async function readRouteId(params: Promise<unknown>) {
   const resolved = await params;

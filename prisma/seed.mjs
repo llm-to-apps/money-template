@@ -4,6 +4,10 @@ import {
   RecordStatus,
   TransactionType
 } from '@prisma/client';
+import nextEnv from '@next/env';
+
+const { loadEnvConfig } = nextEnv;
+loadEnvConfig(process.cwd());
 
 const prisma = new PrismaClient();
 

@@ -1,28 +1,4 @@
-import { NextResponse } from 'next/server';
-
-export type AppErrorCode =
-  | 'BAD_REQUEST'
-  | 'CONFLICT'
-  | 'NOT_FOUND'
-  | 'RATE_LIMITED'
-  | 'UNAUTHORIZED'
-  | 'INTERNAL_ERROR';
-
-export type AppError = {
-  code: AppErrorCode;
-  details?: Record<string, unknown>;
-  message: string;
-};
-
-export type ApiResponse<T> =
-  | {
-      ok: true;
-      data: T;
-    }
-  | {
-      ok: false;
-      error: AppError;
-    };
+import type { ApiResponse, AppError, AppErrorCode } from './api';
 
 export type AppResult<T> = ApiResponse<T>;
 
@@ -83,27 +59,6 @@ export function errorStatus(code: AppErrorCode) {
     case 'INTERNAL_ERROR':
       return 500;
   }
-}
-
-export function jsonError(error: AppError) {
-  return NextResponse.json(
-    {
-      ok: false,
-      error
-    },
-    { status: errorStatus(error.code) }
-  );
-}
-
-export function jsonErrorFromUnknown(error: unknown, fallback?: string) {
-  return jsonError(appErrorFromUnknown(error, fallback));
-}
-
-export function jsonOk<T>(data: T) {
-  return NextResponse.json<ApiResponse<T>>({
-    ok: true,
-    data
-  });
 }
 
 function inferErrorCode(error: unknown): AppErrorCode {

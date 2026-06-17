@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 
 import { listMoneyTransactions } from '@/features/transactions/service';
 import { getCurrentUser } from '@/server/auth';
-import { jsonError, jsonErrorFromUnknown, jsonOk } from '@/shared/result';
+import { jsonError, jsonErrorFromUnknown, jsonOk } from '@/server/http';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

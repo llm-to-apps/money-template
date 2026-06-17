@@ -17,7 +17,7 @@ import type {
   TransactionType
 } from '@/shared/money-types';
 import { formatDateInputValue, waitForUiDelay } from '@/shared/money-utils';
-import type { ApiResponse } from '@/shared/result';
+import type { ApiResponse } from '@/shared/api';
 
 export function useMoneyMutations({
   loadSnapshot,

@@ -38,8 +38,8 @@ AI agents.
 - Use `@/features`, `@/server`, `@/shared`, and `@/mcp` path aliases instead of
   long relative imports.
 - Use typed runtime validation for route, service, and MCP inputs.
-- Use `src/shared/result.ts` and typed `AppException` / `AppError` contracts for
-  HTTP error mapping.
+- Keep public API DTO types in `src/shared/api.ts`, pure app result/error logic
+  in `src/shared/result.ts`, and Next response helpers in `src/server/http.ts`.
 - Do not use misleading collection names. A bounded page of transactions must be
   named like `initialTransactionsPage`, not `transactions`.
 - Large lists must be bounded and cursor-paginated before they can grow without
@@ -47,12 +47,13 @@ AI agents.
 - API routes should be thin adapters: auth, request parsing, service call,
   audit/realtime wiring, and response.
 - UI, API, and MCP paths should reuse the same feature service layer.
-- Public Money JSON APIs must use `ApiResponse<T>` from `src/shared/result.ts`:
+- Public Money JSON APIs must use `ApiResponse<T>` from `src/shared/api.ts`:
   `{ ok: true, data: T }` for success and
   `{ ok: false, error: { code, message, details? } }` for errors. Use the shared
-  `jsonOk`, `jsonError`, and `jsonErrorFromUnknown` helpers instead of returning
-  raw DTOs from public JSON routes. OAuth redirects, SSE events, form redirects,
-  and MCP JSON-RPC are documented exceptions.
+  `jsonOk`, `jsonError`, and `jsonErrorFromUnknown` helpers from
+  `src/server/http.ts` instead of returning raw DTOs from public JSON routes.
+  OAuth redirects, SSE events, form redirects, and MCP JSON-RPC are documented
+  exceptions.
 
 ## Database Rules
 
@@ -67,8 +68,8 @@ When adding or changing Prisma models:
 - Keep API route handlers thin: auth, request parsing, service call, response.
 - Use `@/features`, `@/server`, `@/shared`, and `@/mcp` path aliases instead of
   long relative imports.
-- Use `src/shared/result.ts` for HTTP error mapping instead of custom per-route
-  error envelopes.
+- Use `src/server/http.ts` for HTTP response helpers instead of custom per-route
+  response envelopes.
 - Add MCP tools for user-facing business operations around the model.
 - Update seed data only when useful for a fresh demo app.
 - Keep relations explicit and use sensible delete behavior.

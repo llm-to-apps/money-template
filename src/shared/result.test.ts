@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  appErrorFromUnknown,
-  errorStatus,
-  fail,
-  jsonError,
-  jsonOk,
-  ok
-} from './result';
+import { appErrorFromUnknown, errorStatus, fail, ok } from './result';
 
 describe('result helpers', () => {
   it('creates success and failure results', () => {
@@ -43,31 +36,5 @@ describe('result helpers', () => {
     expect(errorStatus('RATE_LIMITED')).toBe(429);
     expect(errorStatus('BAD_REQUEST')).toBe(400);
     expect(errorStatus('INTERNAL_ERROR')).toBe(500);
-  });
-
-  it('serializes JSON error responses', async () => {
-    const response = jsonError({
-      code: 'RATE_LIMITED',
-      message: 'Too many requests'
-    });
-
-    expect(response.status).toBe(429);
-    await expect(response.json()).resolves.toEqual({
-      ok: false,
-      error: {
-        code: 'RATE_LIMITED',
-        message: 'Too many requests'
-      }
-    });
-  });
-
-  it('serializes JSON success responses', async () => {
-    const response = jsonOk({ id: 'item_1' });
-
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({
-      ok: true,
-      data: { id: 'item_1' }
-    });
   });
 });

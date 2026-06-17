@@ -7,7 +7,7 @@ import {
   updateMoneyWallet
 } from '@/features/wallets/service';
 import { jsonMutationWithSnapshot, readRouteId } from '@/server/route-helpers';
-import { jsonError, jsonErrorFromUnknown, jsonOk } from '@/shared/result';
+import { jsonError, jsonErrorFromUnknown, jsonOk } from '@/server/http';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

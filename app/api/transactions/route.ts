@@ -5,7 +5,7 @@ import { createMoneyTransaction } from '@/features/transactions/service';
 import type { CreateTransactionInput } from '@/features/transactions/schemas';
 import { auditMoneyMutation } from '@/server/audit';
 import { authorizeMoneyMutation } from '@/server/mutation-guard';
-import { jsonErrorFromUnknown, jsonOk } from '@/shared/result';
+import { jsonErrorFromUnknown, jsonOk } from '@/server/http';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

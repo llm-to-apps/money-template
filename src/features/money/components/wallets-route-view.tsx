@@ -18,7 +18,7 @@ import type {
   MoneySnapshot,
   WalletRecord
 } from '@/shared/money-types';
-import type { ApiResponse } from '@/shared/result';
+import type { ApiResponse } from '@/shared/api';
 
 type MutationFormHandler = (event: FormEvent<HTMLFormElement>) => void;
 

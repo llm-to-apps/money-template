@@ -5,7 +5,7 @@ import { NextRequest } from 'next/server';
 import { getCurrentUser } from '@/server/auth';
 import { clientRateLimitKey, requestId } from '@/server/request-context';
 import { checkRateLimit } from '@/server/rate-limit';
-import { jsonError } from '@/shared/result';
+import { jsonError } from '@/server/http';
 
 const mutationLimit = {
   limit: 120,
