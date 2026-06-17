@@ -9,9 +9,9 @@ import { useMoneyMutations } from '@/features/money/dashboard/use-money-mutation
 import { useMoneySnapshot } from '@/features/money/dashboard/use-money-snapshot';
 import {
   ActionErrorModal,
-  RouteView,
-  Splash
+  RouteView
 } from '@/features/money/components/money-views';
+import { RouteSkeleton } from '@/features/money/components/loading-skeletons';
 import type { MoneyDashboardProps } from '@/shared/money-types';
 import { routeModeFromPathname, viewFromPathname } from '@/shared/money-utils';
 
@@ -31,7 +31,6 @@ export function MoneyDashboard({
     loadSnapshot,
     setError,
     setSnapshot,
-    showSplash,
     snapshot,
     user
   } = useMoneySnapshot({ initialUser });
@@ -43,17 +42,28 @@ export function MoneyDashboard({
     snapshot
   });
 
-  if (showSplash) {
-    return <Splash />;
+  if (error && !snapshot) {
+    return (
+      <Center mih="100vh">
+        <Alert color="red" title="Could not load Money">
+          {error}
+        </Alert>
+      </Center>
+    );
   }
 
   if (!snapshot) {
     return (
-      <Center mih="100vh">
-        <Alert color="red" title="Could not load Money">
-          {error ?? 'Could not load money dashboard.'}
-        </Alert>
-      </Center>
+      <MoneyDashboardShell
+        currentView={currentView}
+        displayName={user.displayName ?? 'Local'}
+        isEmbedded={initialIsEmbedded}
+        mobileNavOpened={mobileNavOpened}
+        onCloseMobileNav={mobileNav.close}
+        onToggleMobileNav={mobileNav.toggle}
+      >
+        <RouteSkeleton routeMode={routeMode} view={currentView} />
+      </MoneyDashboardShell>
     );
   }
 

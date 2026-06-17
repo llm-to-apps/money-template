@@ -20,9 +20,7 @@ export function useMoneySnapshot({ initialUser }: { initialUser: MoneyUser }) {
   const [user, setUser] = useState<MoneyUser>(initialUser);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showSplash, setShowSplash] = useState(true);
   const [, startTransition] = useTransition();
-  const [splashStartedAt] = useState(() => Date.now());
 
   const loadSnapshot = useCallback(
     async (options: { showLoading?: boolean } = {}) => {
@@ -84,22 +82,6 @@ export function useMoneySnapshot({ initialUser }: { initialUser: MoneyUser }) {
     };
   }, [loadSnapshot]);
 
-  useEffect(() => {
-    if (isLoading || !showSplash) {
-      return;
-    }
-
-    const elapsed = Date.now() - splashStartedAt;
-    const exitDelay = Math.max(0, 800 - elapsed);
-    const hideTimer = window.setTimeout(() => {
-      setShowSplash(false);
-    }, exitDelay);
-
-    return () => {
-      window.clearTimeout(hideTimer);
-    };
-  }, [isLoading, showSplash, splashStartedAt]);
-
   const activeCategories = useMemo(
     () =>
       snapshot?.categories.filter((category) => category.status === 'ACTIVE') ??
@@ -120,7 +102,6 @@ export function useMoneySnapshot({ initialUser }: { initialUser: MoneyUser }) {
     loadSnapshot,
     setError,
     setSnapshot,
-    showSplash,
     snapshot,
     user
   };

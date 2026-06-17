@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Card } from '@mantine/core';
 
+import { FormSkeleton } from '@/features/money/components/loading-skeletons';
 import {
   AddTransactionForm,
   TransactionForm,
@@ -184,12 +185,10 @@ function TransactionEditView({
           transaction={transaction}
           wallets={wallets}
         />
+      ) : status === 'error' ? (
+        <Card withBorder>Transaction not found.</Card>
       ) : (
-        <Card withBorder>
-          {status === 'loading'
-            ? 'Loading transaction...'
-            : 'Transaction not found.'}
-        </Card>
+        <FormSkeleton />
       )}
     </ViewStack>
   );

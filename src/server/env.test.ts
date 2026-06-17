@@ -49,7 +49,10 @@ describe('server env helpers', () => {
       OS7_PROJECT_TOKEN_INTROSPECTION_URL: 'https://auth.internal/introspect',
       PROJECT_ID: 'project_1',
       PROJECT_SERVICE_API_BASE_URI: 'https://api.example.com///',
-      PROJECT_SERVICE_API_TOKEN: 'project-token'
+      PROJECT_SERVICE_API_TOKEN: 'project-token',
+      SENTRY_DSN: 'https://public@example.sentry.io/123',
+      SENTRY_ENVIRONMENT: 'preview',
+      SENTRY_RELEASE: 'money@1.0.0'
     } as NodeJS.ProcessEnv;
 
     const env = await import('./env');
@@ -70,6 +73,9 @@ describe('server env helpers', () => {
     );
     expect(env.projectServiceApiBaseUri()).toBe('https://api.example.com');
     expect(env.projectServiceApiToken()).toBe('project-token');
+    expect(env.sentryDsn()).toBe('https://public@example.sentry.io/123');
+    expect(env.sentryEnvironment()).toBe('preview');
+    expect(env.sentryRelease()).toBe('money@1.0.0');
   });
 
   it('throws when a required value is missing', async () => {

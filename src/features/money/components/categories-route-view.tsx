@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Card } from '@mantine/core';
 
+import { FormSkeleton } from '@/features/money/components/loading-skeletons';
 import {
   CategoriesList,
   CategoryForm
@@ -164,10 +165,10 @@ function CategoryEditView({
           onDeleteCategory={onDeleteCategory}
           onSubmit={(event) => onUpdateCategory(event, category.id)}
         />
+      ) : status === 'error' ? (
+        <Card withBorder>Category not found.</Card>
       ) : (
-        <Card withBorder>
-          {status === 'loading' ? 'Loading category...' : 'Category not found.'}
-        </Card>
+        <FormSkeleton />
       )}
     </ViewStack>
   );

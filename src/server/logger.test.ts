@@ -18,18 +18,21 @@ describe('server logger', () => {
 
     expect(JSON.parse(String(info.mock.calls[0]?.[0]))).toMatchObject({
       app: 'money',
+      event: 'started',
       level: 'info',
       message: 'started',
       requestId: 'request_1'
     });
     expect(JSON.parse(String(warn.mock.calls[0]?.[0]))).toMatchObject({
       app: 'money',
+      event: 'careful',
       level: 'warn',
       message: 'careful'
     });
     expect(JSON.parse(String(error.mock.calls[0]?.[0]))).toMatchObject({
       app: 'money',
       code: 'BAD_REQUEST',
+      event: 'failed',
       level: 'error',
       message: 'failed'
     });

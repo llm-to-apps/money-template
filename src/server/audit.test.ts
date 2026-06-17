@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   logInfo: vi.fn(),
+  logWarn: vi.fn(),
   prisma: {
     auditEvent: {
       create: vi.fn()
@@ -14,7 +15,8 @@ vi.mock('@/server/db', () => ({
 }));
 
 vi.mock('@/server/logger', () => ({
-  logInfo: mocks.logInfo
+  logInfo: mocks.logInfo,
+  logWarn: mocks.logWarn
 }));
 
 describe('audit events', () => {
@@ -42,8 +44,12 @@ describe('audit events', () => {
       }
     });
     expect(mocks.logInfo).toHaveBeenCalledWith(
-      'money mutation audited',
-      expect.objectContaining({ action: 'wallet.created', audit: true })
+      'audit.money_mutation.persist.finished',
+      expect.objectContaining({
+        action: 'wallet.created',
+        audit: true,
+        metadataKeys: ['walletId']
+      })
     );
   });
 });

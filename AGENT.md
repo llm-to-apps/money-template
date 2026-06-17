@@ -94,9 +94,10 @@ For every MCP tool:
 - Execute business operations through the related feature service.
 - Return business objects, not UI strings.
 - Do not expose secrets or raw environment values.
-- If the tool mutates data, notify realtime listeners.
+- If the tool changes user-visible data or runtime-visible state, notify
+  realtime listeners after the mutation commits.
 
-For data mutations, call the existing realtime notification helper so the browser updates without refresh.
+For data mutations, call the existing realtime notification helper so the browser updates without refresh. MCP, API, and UI actions that perform the same mutation must reuse the same service-layer path so validation, audit logging, and realtime notifications cannot drift.
 
 ## Realtime Rules
 
@@ -108,6 +109,43 @@ When adding a mutating MCP action or server action:
 - Include a concise action name in the payload, such as `wallet.created` or `category.upserted`.
 - Keep the payload small.
 - Use realtime notifications to update focused client state or fetch a small JSON snapshot. Do not refresh or reload the whole route for ordinary data changes.
+- Do not rely on periodic polling as the primary way to notice MCP-driven
+  mutations. The MCP path must actively publish the same UI invalidation signal
+  as the browser/API mutation path.
+
+## Logging And Audit Rules
+
+Money should keep runtime logs structured and safe. Use the existing server
+logger/audit helpers instead of adding scattered raw `console.log` calls in
+feature services, API routes, MCP handlers, or Prisma-heavy code.
+
+For server operations, log stable lifecycle events where useful:
+
+- `<operation>.started`
+- `<operation>.finished`
+- `<operation>.failed`
+
+When `SENTRY_DSN` is configured, Money must forward server-side unexpected
+errors to Sentry in addition to writing structured runtime logs. Sentry reporting
+must remain optional and must redact tokens, cookies, OAuth codes, OAuth state,
+secrets, provider payloads, SQL details, and large finance payloads.
+
+Include available context such as `requestId`, `userId`, operation name, record
+type/id, status, and `elapsedMs`. For MCP actions, log the tool name, status, and
+duration, but do not dump raw arguments or full result payloads when they may
+contain personal finance data.
+
+Never log secrets or raw credentials. Logs must not include auth tokens, cookies,
+OAuth codes, API keys, database passwords, full connection strings, private
+headers, or unredacted environment values.
+
+Business mutations should keep using persistent audit events in addition to
+runtime logs. Audit events are the accountability trail; runtime logs are for
+debugging and operations.
+
+User-facing errors should stay concise and safe. Do not expose stack traces,
+provider payloads, SQL details, tokens, or implementation-specific log context in
+UI/API/MCP responses.
 
 ## UI Rules
 

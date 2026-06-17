@@ -15,13 +15,12 @@ export async function GET(request: NextRequest) {
 
   const origin = await publicOrigin();
   const oauthRequest = await createOAuthRequest(origin);
-  logInfo('[Money OAuth Login] rendered bridge login', {
+  logInfo('auth.oauth_login_bridge.rendered', {
     clientId: oauthRequest.clientId,
     isFrameHint: request.headers.get('sec-fetch-dest') === 'iframe',
     origin,
-    parentOrigin: oauthRequest.parentOrigin,
-    redirectUri: oauthRequest.redirectUri,
-    state: oauthRequest.state
+    provider: 'os7',
+    redirectUri: oauthRequest.redirectUri
   });
 
   return new NextResponse(renderOAuthLoginPage(oauthRequest), {

@@ -40,71 +40,81 @@ export function renderOAuthLoginPage(oauthRequest: OAuthBridgeRequest) {
         font-size: 18px;
         letter-spacing: 0;
       }
-      .spinner {
+      p {
+        max-width: 320px;
+        margin: 0;
+        color: #5f6f6a;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+      .mark {
         width: 34px;
         height: 34px;
-        border: 3px solid #d9dfda;
-        border-top-color: #0f8b6f;
+        border: 1px solid #cbd5cd;
         border-radius: 999px;
-        animation: spin 0.8s linear infinite;
+        display: grid;
+        place-items: center;
+        color: #0f6f59;
+        font-size: 14px;
+        font-weight: 700;
       }
-      @keyframes spin { to { transform: rotate(360deg); } }
     </style>
   </head>
   <body>
     <main>
-      <div class="spinner" aria-hidden="true"></div>
-      <h1 id="status">Signing you in...</h1>
+      <div class="mark" aria-hidden="true">M</div>
+      <h1 id="status">Checking your OS7 session...</h1>
+      <p id="detail">Money is asking OS7 for a secure sign-in response.</p>
     </main>
     <script>
       const oauthRequest = ${payload};
       const status = document.getElementById('status');
+      const detail = document.getElementById('detail');
       const interactiveLoginUrl = '/api/auth/login?interactive=1';
-      console.info('[Money OAuth Frame] login page loaded', {
-        isFrame: window.parent !== window,
-        parentOrigin: oauthRequest.parentOrigin,
-        redirectUri: oauthRequest.redirectUri,
-        state: oauthRequest.state
-      });
+      let detailTimer = 0;
+
+      function setMessage(nextStatus, nextDetail) {
+        status.textContent = nextStatus;
+        detail.textContent = nextDetail;
+      }
+
+      detailTimer = window.setTimeout(() => {
+        setMessage(
+          'Still waiting for OS7...',
+          'If your session needs attention, Money will open the OS7 sign-in screen.'
+        );
+      }, 2500);
 
       if (window.parent === window) {
-        console.info('[Money OAuth Frame] top-level login fallback');
         window.location.replace('/api/auth/login');
       } else {
         let isDone = false;
-        let requestAttempt = 0;
         let retryInterval = 0;
         const timeout = window.setTimeout(() => {
           isDone = true;
+          window.clearTimeout(detailTimer);
           window.clearInterval(retryInterval);
-          console.warn('[Money OAuth Frame] oauth:response timeout; falling back to interactive login');
+          setMessage(
+            'Opening OS7 sign-in...',
+            'The automatic session check took too long, so Money is switching to the interactive sign-in flow.'
+          );
           window.location.replace(interactiveLoginUrl);
         }, 15000);
 
         window.addEventListener('message', (event) => {
-          console.info('[Money OAuth Frame] message received', {
-            eventOrigin: event.origin,
-            expectedOrigin: oauthRequest.parentOrigin,
-            stateMatches: event.data?.state === oauthRequest.state,
-            type: event.data?.type
-          });
-
           if (event.origin !== oauthRequest.parentOrigin || event.data?.state !== oauthRequest.state) {
-            console.warn('[Money OAuth Frame] ignored message', {
-              eventOrigin: event.origin,
-              expectedOrigin: oauthRequest.parentOrigin,
-              eventState: event.data?.state,
-              expectedState: oauthRequest.state,
-              type: event.data?.type
-            });
             return;
           }
 
           if (event.data.type === 'oauth:response' && event.data.code) {
             isDone = true;
             window.clearTimeout(timeout);
+            window.clearTimeout(detailTimer);
             window.clearInterval(retryInterval);
-            console.info('[Money OAuth Frame] oauth:response accepted; redirecting to callback');
+            setMessage(
+              'Finishing sign-in...',
+              'Money received your OS7 response and is exchanging it for an app session.'
+            );
             const callbackUrl = new URL(oauthRequest.redirectUri);
             callbackUrl.searchParams.set('code', event.data.code);
             callbackUrl.searchParams.set('state', oauthRequest.state);
@@ -115,9 +125,12 @@ export function renderOAuthLoginPage(oauthRequest: OAuthBridgeRequest) {
           if (event.data.type === 'oauth:error') {
             isDone = true;
             window.clearTimeout(timeout);
+            window.clearTimeout(detailTimer);
             window.clearInterval(retryInterval);
-            console.error('[Money OAuth Frame] oauth:error received', event.data);
-            status.textContent = event.data.message || 'Sign-in failed. Opening OS7 sign-in...';
+            setMessage(
+              event.data.message || 'Opening OS7 sign-in...',
+              'Money could not complete the embedded check, so it is switching to the full sign-in screen.'
+            );
             window.location.replace(interactiveLoginUrl);
           }
         });
@@ -127,14 +140,6 @@ export function renderOAuthLoginPage(oauthRequest: OAuthBridgeRequest) {
             return;
           }
 
-          requestAttempt += 1;
-          console.info('[Money OAuth Frame] posting oauth:request', {
-            attempt: requestAttempt,
-            clientId: oauthRequest.clientId,
-            parentOrigin: oauthRequest.parentOrigin,
-            redirectUri: oauthRequest.redirectUri,
-            state: oauthRequest.state
-          });
           window.parent.postMessage(
             {
               type: 'oauth:request',

@@ -18,6 +18,10 @@ data is loaded and refreshed through focused JSON APIs from the client. Routine
 mutations should use local state, optimistic updates, targeted fetches, and
 realtime notifications instead of full route reloads.
 
+Initial loading keeps the application shell visible and uses route-aware
+skeletons for dashboards, tables, and edit forms. OAuth bridge screens use
+short status text without animated spinners on the normal fast path.
+
 ## Architecture
 
 - `app/` contains Next.js routes, route boundaries, and thin API adapters.

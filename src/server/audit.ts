@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { logInfo } from '@/server/logger';
+import { logInfo, logWarn } from '@/server/logger';
 import { prisma } from '@/server/db';
 
 export type AuditAction =
@@ -35,7 +35,7 @@ export async function auditMoneyMutation({
       }
     })
     .catch((error: unknown) => {
-      logInfo('money mutation audit persistence failed', {
+      logWarn('audit.money_mutation.persist.failed', {
         action,
         error: error instanceof Error ? error.message : String(error),
         requestId,
@@ -43,10 +43,10 @@ export async function auditMoneyMutation({
       });
     });
 
-  logInfo('money mutation audited', {
+  logInfo('audit.money_mutation.persist.finished', {
     action,
     audit: true,
-    metadata,
+    metadataKeys: Object.keys(metadata),
     requestId,
     userId
   });

@@ -21,7 +21,10 @@ const envSchema = z.object({
   OS7_PROJECT_TOKEN_INTROSPECTION_URL: z.string().url().optional(),
   PROJECT_ID: z.string().min(1).optional(),
   PROJECT_SERVICE_API_BASE_URI: z.string().url().optional(),
-  PROJECT_SERVICE_API_TOKEN: z.string().min(1).optional()
+  PROJECT_SERVICE_API_TOKEN: z.string().min(1).optional(),
+  SENTRY_DSN: z.string().url().optional(),
+  SENTRY_ENVIRONMENT: z.string().min(1).optional(),
+  SENTRY_RELEASE: z.string().min(1).optional()
 });
 
 type MoneyEnv = z.infer<typeof envSchema>;
@@ -118,4 +121,16 @@ export function projectServiceApiBaseUri() {
 
 export function projectServiceApiToken() {
   return requiredEnv('PROJECT_SERVICE_API_TOKEN');
+}
+
+export function sentryDsn() {
+  return env().SENTRY_DSN ?? null;
+}
+
+export function sentryEnvironment() {
+  return env().SENTRY_ENVIRONMENT ?? env().NODE_ENV ?? null;
+}
+
+export function sentryRelease() {
+  return env().SENTRY_RELEASE ?? null;
 }

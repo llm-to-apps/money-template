@@ -33,6 +33,14 @@ client application while staying simple enough for agents to safely extend.
   - footer for secondary status or metadata
 - Routine actions should feel app-like: optimistic updates, focused refreshes,
   and realtime updates instead of full page reloads.
+- Initial app loading should keep the shell visible and use route-aware
+  skeletons for dashboards, tables, lists, charts, and forms. Avoid full-screen
+  spinners for normal auth and data bootstrap paths.
+- Empty-before-data states must render skeletons, not errors. Money should show
+  `Could not load Money`, `not found`, or similar error states only after an
+  explicit failed request, exception, or validated not-found response.
+- OAuth bridge screens should explain the current sign-in step with short status
+  text and avoid animated spinners on the normal fast path.
 - The dashboard should be readable at a glance and should prioritize the next
   useful action.
 
@@ -48,7 +56,9 @@ Required motion behavior:
 - cards and panels may softly enter when dashboard data appears
 - newly added transactions should appear without a harsh layout jump
 - errors should be shown with a short, non-distracting transition
-- loading and saving states should be visible without blocking the whole app
+- loading and saving states should be visible without blocking the whole app;
+  prefer skeletons for page data and reserve spinners for narrow local actions
+  such as saving buttons or inline pagination
 - all animations must respect `prefers-reduced-motion`
 
 Motion should stay practical and quiet. Money is a finance tool, so avoid

@@ -49,12 +49,11 @@ export async function createOAuthRequest(origin: string) {
     maxAge: 10 * 60,
     path: '/'
   });
-  logInfo('[Money Auth] created OAuth request', {
+  logInfo('auth.oauth_request.created', {
     clientId: oauthClientId(),
     origin,
-    parentOrigin: oauthIssuerOrigin(),
-    redirectUri,
-    state
+    provider: 'os7',
+    redirectUri
   });
 
   return {
@@ -95,21 +94,17 @@ export async function handleOAuthCallback({
   state: string;
 }) {
   ensureOAuthAuthMode();
-  logInfo('[Money Auth] handling callback', {
+  const startedAt = Date.now();
+  logInfo('auth.oauth_callback.started', {
     codePresent: Boolean(code),
     origin,
-    state
+    provider: 'os7',
+    statePresent: Boolean(state)
   });
   await verifyOAuthState(state);
-  logInfo('[Money Auth] state verified', { state });
+  logInfo('auth.oauth_state.verified', { provider: 'os7' });
   const accessToken = await exchangeCodeForAccessToken(code, origin);
-  logInfo('[Money Auth] token exchange complete', { state });
   const userInfo = await fetchUserInfo(accessToken);
-  logInfo('[Money Auth] userinfo fetched', {
-    email: userInfo.email,
-    state,
-    sub: userInfo.sub
-  });
   const user = await prisma.user.upsert({
     where: {
       id: userInfo.sub
@@ -133,10 +128,10 @@ export async function handleOAuthCallback({
     name: user.name,
     role: user.role
   });
-  logInfo('[Money Auth] local session created', {
-    email: user.email,
+  logInfo('auth.session.created', {
+    elapsedMs: Date.now() - startedAt,
     origin,
-    state,
+    provider: 'os7',
     userId: user.id
   });
 }
@@ -146,13 +141,15 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
   if (isLocalAuthMode()) {
     if (cookieStore.get(loggedOutCookie)?.value === '1') {
-      logInfo('[Money Auth] local dev user is signed out');
+      logInfo('auth.local_user.signed_out', {
+        mode: 'local'
+      });
       return null;
     }
 
     const user = localAuthUser();
-    logInfo('[Money Auth] local dev user accepted', {
-      email: user.email,
+    logInfo('auth.local_user.accepted', {
+      mode: 'local',
       userId: user.id
     });
 
@@ -162,7 +159,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const token = cookieStore.get(sessionCookie)?.value;
 
   if (!token) {
-    logInfo('[Money Auth] no local session cookie');
+    logInfo('auth.session.missing');
     return null;
   }
 
@@ -183,12 +180,12 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   });
 
   if (!session) {
-    logInfo('[Money Auth] local session not found');
+    logInfo('auth.session.not_found');
     return null;
   }
 
   if (session.expiresAt.getTime() <= Date.now()) {
-    logInfo('[Money Auth] local session expired', {
+    logInfo('auth.session.expired', {
       sessionId: session.id,
       userId: session.userId
     });
@@ -198,8 +195,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     return null;
   }
 
-  logInfo('[Money Auth] local session accepted', {
-    email: session.user.email,
+  logInfo('auth.session.accepted', {
     userId: session.user.id
   });
   return session.user;
@@ -285,17 +281,18 @@ async function verifyOAuthState(state: string) {
   }
 
   if (verifySignedOAuthState(state)) {
-    logInfo('[Money Auth] verified signed OAuth state', {
+    logInfo('auth.oauth_state.signed_verified', {
       cookieStatePresent: Boolean(expectedState),
-      receivedState: state
+      provider: 'os7'
     });
     return;
   }
 
   if (!expectedState || !constantTimeEqual(expectedState, state)) {
-    logWarn('[Money Auth] invalid OAuth state', {
+    logWarn('auth.oauth_state.invalid', {
       expectedStatePresent: Boolean(expectedState),
-      receivedState: state
+      provider: 'os7',
+      receivedStatePresent: Boolean(state)
     });
     throw new Error('Invalid OAuth state');
   }
@@ -311,9 +308,9 @@ async function exchangeCodeForAccessToken(code: string, origin: string) {
   });
 
   const tokenUrl = oauthInternalTokenUrl();
-  logInfo('[Money Auth] exchanging code for token', {
-    tokenUrl,
-    usingInternalUrl: true
+  const startedAt = Date.now();
+  logInfo('auth.oauth_token_exchange.started', {
+    provider: 'os7'
   });
   const response = await fetch(tokenUrl, {
     method: 'POST',
@@ -325,9 +322,10 @@ async function exchangeCodeForAccessToken(code: string, origin: string) {
   });
 
   if (!response.ok) {
-    logWarn('[Money Auth] token exchange failed', {
-      status: response.status,
-      tokenUrl
+    logWarn('auth.oauth_token_exchange.failed', {
+      elapsedMs: Date.now() - startedAt,
+      provider: 'os7',
+      status: response.status
     });
     throw new Error(`OAuth token exchange failed: ${response.status}`);
   }
@@ -335,17 +333,28 @@ async function exchangeCodeForAccessToken(code: string, origin: string) {
   const payload = (await response.json()) as { access_token?: string };
 
   if (!payload.access_token) {
+    logWarn('auth.oauth_token_exchange.failed', {
+      elapsedMs: Date.now() - startedAt,
+      provider: 'os7',
+      status: 'missing_access_token'
+    });
     throw new Error('OAuth token response did not include an access token');
   }
+
+  logInfo('auth.oauth_token_exchange.finished', {
+    elapsedMs: Date.now() - startedAt,
+    provider: 'os7',
+    status: response.status
+  });
 
   return payload.access_token;
 }
 
 async function fetchUserInfo(accessToken: string) {
   const userinfoUrl = oauthInternalUserinfoUrl();
-  logInfo('[Money Auth] fetching userinfo', {
-    userinfoUrl,
-    usingInternalUrl: true
+  const startedAt = Date.now();
+  logInfo('auth.oauth_userinfo.started', {
+    provider: 'os7'
   });
   const response = await fetch(userinfoUrl, {
     headers: {
@@ -355,9 +364,10 @@ async function fetchUserInfo(accessToken: string) {
   });
 
   if (!response.ok) {
-    logWarn('[Money Auth] userinfo failed', {
-      status: response.status,
-      userinfoUrl
+    logWarn('auth.oauth_userinfo.failed', {
+      elapsedMs: Date.now() - startedAt,
+      provider: 'os7',
+      status: response.status
     });
     throw new Error(`OAuth userinfo request failed: ${response.status}`);
   }
@@ -365,8 +375,20 @@ async function fetchUserInfo(accessToken: string) {
   const payload = (await response.json()) as OAuthUserInfo;
 
   if (!payload.sub || !payload.email || !payload.role) {
+    logWarn('auth.oauth_userinfo.failed', {
+      elapsedMs: Date.now() - startedAt,
+      provider: 'os7',
+      status: 'invalid_payload'
+    });
     throw new Error('OAuth userinfo response is missing sub, email, or role');
   }
+
+  logInfo('auth.oauth_userinfo.finished', {
+    elapsedMs: Date.now() - startedAt,
+    provider: 'os7',
+    status: response.status,
+    userId: payload.sub
+  });
 
   return payload;
 }

@@ -14,17 +14,21 @@ export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
   const state = request.nextUrl.searchParams.get('state');
   const error = request.nextUrl.searchParams.get('error');
-  logInfo('[Money OAuth Callback] request', {
+  const startedAt = Date.now();
+  logInfo('auth.oauth_callback.received', {
     codePresent: Boolean(code),
-    error,
     origin,
-    state
+    provider: 'os7',
+    statePresent: Boolean(state),
+    status: error ? 'provider_error' : 'received'
   });
 
   if (error) {
-    logWarn('[Money OAuth Callback] provider returned error', {
+    logWarn('auth.oauth_callback.provider_error', {
+      elapsedMs: Date.now() - startedAt,
       error,
-      origin
+      origin,
+      provider: 'os7'
     });
     return NextResponse.redirect(
       new URL(`/api/auth/login?interactive=1&error=${error}`, origin)
@@ -32,10 +36,12 @@ export async function GET(request: NextRequest) {
   }
 
   if (!code || !state) {
-    logWarn('[Money OAuth Callback] invalid callback params', {
+    logWarn('auth.oauth_callback.invalid_params', {
       codePresent: Boolean(code),
+      elapsedMs: Date.now() - startedAt,
       origin,
-      state
+      provider: 'os7',
+      statePresent: Boolean(state)
     });
     return NextResponse.redirect(
       new URL('/api/auth/login?error=invalid_callback', origin)
@@ -48,12 +54,17 @@ export async function GET(request: NextRequest) {
       origin,
       state
     });
-    logInfo('[Money OAuth Callback] completed', { origin, state });
+    logInfo('auth.oauth_callback.finished', {
+      elapsedMs: Date.now() - startedAt,
+      origin,
+      provider: 'os7'
+    });
   } catch (error) {
-    logError('Money OAuth callback failed', {
+    logError('auth.oauth_callback.failed', {
+      elapsedMs: Date.now() - startedAt,
       error: error instanceof Error ? error.message : String(error),
       origin,
-      state
+      provider: 'os7'
     });
 
     return NextResponse.redirect(

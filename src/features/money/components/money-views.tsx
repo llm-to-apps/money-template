@@ -3,7 +3,6 @@
 import { FormEvent } from 'react';
 
 export { ActionErrorModal } from '@/features/money/components/action-error-modal';
-export { Splash } from '@/features/money/components/splash';
 export { UserMenu } from '@/features/money/components/user-menu';
 
 import { CategoriesRouteView } from '@/features/money/components/categories-route-view';

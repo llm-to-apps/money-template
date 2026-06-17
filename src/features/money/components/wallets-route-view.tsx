@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Card } from '@mantine/core';
 
+import { FormSkeleton } from '@/features/money/components/loading-skeletons';
 import {
   WalletForm,
   WalletsList
@@ -148,10 +149,10 @@ function WalletEditView({
           onSubmit={(event) => onUpdateWallet(event, wallet.id)}
           wallet={wallet}
         />
+      ) : status === 'error' ? (
+        <Card withBorder>Wallet not found.</Card>
       ) : (
-        <Card withBorder>
-          {status === 'loading' ? 'Loading wallet...' : 'Wallet not found.'}
-        </Card>
+        <FormSkeleton />
       )}
     </ViewStack>
   );
