@@ -32,8 +32,8 @@
   },
   "resources": {
     "memory": {
-      "reservationMb": 128,
-      "limitMb": 1024
+      "reservationMb": 256,
+      "limitMb": 2048
     },
     "cpu": {
       "reservation": 0.05,
