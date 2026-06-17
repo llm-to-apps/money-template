@@ -63,9 +63,12 @@ describe('transaction API route', () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
-      initialTransactionsPage: {
-        transactions: [{ id: 'transaction_new' }]
-      }
+      data: {
+        initialTransactionsPage: {
+          transactions: [{ id: 'transaction_new' }]
+        }
+      },
+      ok: true
     });
     expect(mocks.auditMoneyMutation).toHaveBeenCalledWith(
       expect.objectContaining({

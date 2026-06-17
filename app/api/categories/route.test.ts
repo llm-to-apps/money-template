@@ -54,7 +54,10 @@ describe('category API route', () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
-      categories: [{ id: 'category_new', name: 'Travel' }]
+      data: {
+        categories: [{ id: 'category_new', name: 'Travel' }]
+      },
+      ok: true
     });
     expect(mocks.auditMoneyMutation).toHaveBeenCalledWith(
       expect.objectContaining({

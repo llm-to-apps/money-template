@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "es2022"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2022"
+    ],
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
@@ -11,10 +15,18 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@/tests/*": ["tests/*"],
-      "@/*": ["src/*"],
-      "@/app/*": ["app/*"],
-      "@os7/ui-kit/*": ["ui-kit/src/*"]
+      "@/tests/*": [
+        "tests/*"
+      ],
+      "@/*": [
+        "src/*"
+      ],
+      "@/app/*": [
+        "app/*"
+      ],
+      "@os7/ui-kit/*": [
+        "ui-kit/src/*"
+      ]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -31,7 +43,11 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    ".next-e2e/types/**/*.ts",
+    ".next-e2e/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

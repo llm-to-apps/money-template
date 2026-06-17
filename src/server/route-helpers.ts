@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
 import { getCurrentUser, isManuallyLoggedOut } from '@/server/auth';
 import { getMoneySnapshot } from '@/server/money';
 import { type AuditAction, auditMoneyMutation } from '@/server/audit';
 import { authorizeMoneyMutation } from '@/server/mutation-guard';
-import { jsonErrorFromUnknown } from '@/shared/result';
+import { jsonError, jsonErrorFromUnknown, jsonOk } from '@/shared/result';
 
 export async function readRouteId(params: Promise<unknown>) {
   const resolved = await params;
@@ -30,13 +30,13 @@ export async function dashboardPayload() {
   if (!user) {
     return {
       ok: false as const,
-      response: NextResponse.json(
-        {
-          ok: false,
+      response: jsonError({
+        code: 'UNAUTHORIZED',
+        details: {
           redirectTo: manuallyLoggedOut ? '/auth/signed-out' : '/auth/login'
         },
-        { status: 401 }
-      )
+        message: 'Unauthorized'
+      })
     };
   }
 
@@ -84,5 +84,5 @@ export async function jsonMutationWithSnapshot({
     return jsonErrorFromUnknown(error, validationFallback);
   }
 
-  return NextResponse.json(await getMoneySnapshot());
+  return jsonOk(await getMoneySnapshot());
 }

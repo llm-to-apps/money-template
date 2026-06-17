@@ -20,6 +20,7 @@ import type {
   MoneySnapshot,
   TransactionRecord
 } from '@/shared/money-types';
+import type { ApiResponse } from '@/shared/result';
 
 type MutationFormHandler = (event: FormEvent<HTMLFormElement>) => void;
 
@@ -145,12 +146,16 @@ function TransactionEditView({
           throw new Error('transaction not found');
         }
 
-        const payload = (await response.json()) as {
+        const payload = (await response.json()) as ApiResponse<{
           transaction: TransactionRecord;
-        };
+        }>;
+
+        if (!payload.ok) {
+          throw new Error('transaction not found');
+        }
 
         if (isCurrent) {
-          setTransaction(payload.transaction);
+          setTransaction(payload.data.transaction);
           setStatus('idle');
         }
       } catch {

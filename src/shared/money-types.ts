@@ -99,7 +99,12 @@ export type MoneyDashboardPayload = MoneySnapshot & {
 };
 
 export type AuthErrorPayload = {
-  redirectTo?: string;
+  error?: {
+    details?: {
+      redirectTo?: string;
+    };
+    message?: string;
+  };
 };
 
 export type MoneyUser = {

@@ -47,6 +47,12 @@ AI agents.
 - API routes should be thin adapters: auth, request parsing, service call,
   audit/realtime wiring, and response.
 - UI, API, and MCP paths should reuse the same feature service layer.
+- Public Money JSON APIs must use `ApiResponse<T>` from `src/shared/result.ts`:
+  `{ ok: true, data: T }` for success and
+  `{ ok: false, error: { code, message, details? } }` for errors. Use the shared
+  `jsonOk`, `jsonError`, and `jsonErrorFromUnknown` helpers instead of returning
+  raw DTOs from public JSON routes. OAuth redirects, SSE events, form redirects,
+  and MCP JSON-RPC are documented exceptions.
 
 ## Database Rules
 

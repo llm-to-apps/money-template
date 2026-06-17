@@ -42,7 +42,10 @@ describe('category detail API route', () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
-      category: { id: 'category_1' }
+      data: {
+        category: { id: 'category_1' }
+      },
+      ok: true
     });
     expect(mocks.getMoneyCategory).toHaveBeenCalledWith({ id: 'category_1' });
   });

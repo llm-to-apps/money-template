@@ -5,7 +5,7 @@ import { createMoneyTransaction } from '@/features/transactions/service';
 import type { CreateTransactionInput } from '@/features/transactions/schemas';
 import { auditMoneyMutation } from '@/server/audit';
 import { authorizeMoneyMutation } from '@/server/mutation-guard';
-import { jsonErrorFromUnknown } from '@/shared/result';
+import { jsonErrorFromUnknown, jsonOk } from '@/shared/result';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       : redirectTo('/');
   }
 
-  return isJson ? NextResponse.json(await getMoneySnapshot()) : redirectTo('/');
+  return isJson ? jsonOk(await getMoneySnapshot()) : redirectTo('/');
 }
 
 async function readFormTransaction(

@@ -45,8 +45,11 @@ describe('transaction list API route', () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
-      pageInfo: { hasNextPage: false, nextCursor: null },
-      transactions: [{ id: 'transaction_1' }]
+      data: {
+        pageInfo: { hasNextPage: false, nextCursor: null },
+        transactions: [{ id: 'transaction_1' }]
+      },
+      ok: true
     });
     expect(mocks.listMoneyTransactions).toHaveBeenCalledWith({
       cursor: 'transaction_0',

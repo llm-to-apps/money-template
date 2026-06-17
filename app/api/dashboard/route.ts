@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
-
 import { dashboardPayload } from '@/server/route-helpers';
+import { jsonOk } from '@/shared/result';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -12,5 +11,5 @@ export async function GET() {
     return result.response;
   }
 
-  return NextResponse.json(result.payload);
+  return jsonOk(result.payload);
 }

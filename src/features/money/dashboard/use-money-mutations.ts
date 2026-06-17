@@ -17,6 +17,7 @@ import type {
   TransactionType
 } from '@/shared/money-types';
 import { formatDateInputValue, waitForUiDelay } from '@/shared/money-utils';
+import type { ApiResponse } from '@/shared/result';
 
 export function useMoneyMutations({
   loadSnapshot,
@@ -188,7 +189,15 @@ export function useMoneyMutations({
         return;
       }
 
-      const nextSnapshot = (await response.json()) as MoneySnapshot;
+      const payload = (await response.json()) as ApiResponse<MoneySnapshot>;
+
+      if (!payload.ok) {
+        setError(payload.error.message);
+        await loadSnapshot();
+        return;
+      }
+
+      const nextSnapshot = payload.data;
       startTransition(() => {
         setSnapshot(nextSnapshot);
       });
@@ -217,13 +226,22 @@ export function useMoneyMutations({
 
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as {
-          message?: string;
+          error?: {
+            message?: string;
+          };
         } | null;
-        setError(payload?.message ?? 'Could not save changes.');
+        setError(payload?.error?.message ?? 'Could not save changes.');
         return false;
       }
 
-      const nextSnapshot = (await response.json()) as MoneySnapshot;
+      const payload = (await response.json()) as ApiResponse<MoneySnapshot>;
+
+      if (!payload.ok) {
+        setError(payload.error.message);
+        return false;
+      }
+
+      const nextSnapshot = payload.data;
       startTransition(() => {
         setSnapshot(nextSnapshot);
       });

@@ -47,6 +47,7 @@ import {
   getInitialSubcategoryId,
   todayDateInputValue
 } from '@/shared/money-utils';
+import type { ApiResponse } from '@/shared/result';
 
 type MutationFormHandler = (event: FormEvent<HTMLFormElement>) => void;
 type TransactionsPage = {
@@ -98,17 +99,23 @@ export function TransactionsList({ snapshot }: { snapshot: MoneySnapshot }) {
         return;
       }
 
-      const payload = (await response.json()) as TransactionsPage;
+      const payload = (await response.json()) as ApiResponse<TransactionsPage>;
+
+      if (!payload.ok) {
+        return;
+      }
+
+      const page = payload.data;
       setRecords((current) => {
         const existingIds = new Set(current.map((record) => record.id));
-        const newRecords = payload.transactions.filter(
+        const newRecords = page.transactions.filter(
           (record) => !existingIds.has(record.id)
         );
 
         return [...current, ...newRecords];
       });
-      setNextCursor(payload.pageInfo.nextCursor);
-      setHasNextPage(payload.pageInfo.hasNextPage);
+      setNextCursor(page.pageInfo.nextCursor);
+      setHasNextPage(page.pageInfo.hasNextPage);
     } finally {
       setIsLoadingPage(false);
     }

@@ -1,8 +1,7 @@
-import { NextResponse } from 'next/server';
+import { jsonOk } from '@/shared/result';
 
 export function GET() {
-  return NextResponse.json({
-    ok: true,
+  return jsonOk({
     service: 'money-template'
   });
 }

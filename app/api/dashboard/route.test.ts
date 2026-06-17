@@ -27,8 +27,13 @@ describe('dashboard API route', () => {
 
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toMatchObject({
-      ok: false,
-      redirectTo: '/auth/signed-out'
+      error: {
+        code: 'UNAUTHORIZED',
+        details: {
+          redirectTo: '/auth/signed-out'
+        }
+      },
+      ok: false
     });
   });
 
@@ -45,8 +50,11 @@ describe('dashboard API route', () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
-      summary: { balanceCents: 9600 },
-      user: { displayName: 'Local' }
+      data: {
+        summary: { balanceCents: 9600 },
+        user: { displayName: 'Local' }
+      },
+      ok: true
     });
   });
 });

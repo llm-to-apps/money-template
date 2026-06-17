@@ -18,6 +18,7 @@ import type {
   MoneyRouteMode,
   MoneySnapshot
 } from '@/shared/money-types';
+import type { ApiResponse } from '@/shared/result';
 
 type MutationFormHandler = (event: FormEvent<HTMLFormElement>) => void;
 
@@ -126,12 +127,16 @@ function CategoryEditView({
           throw new Error('category not found');
         }
 
-        const payload = (await response.json()) as {
+        const payload = (await response.json()) as ApiResponse<{
           category: CategoryRecord;
-        };
+        }>;
+
+        if (!payload.ok) {
+          throw new Error('category not found');
+        }
 
         if (isCurrent) {
-          setCategory(payload.category);
+          setCategory(payload.data.category);
           setStatus('idle');
         }
       } catch {

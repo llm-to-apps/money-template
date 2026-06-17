@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
 import { getCurrentUser } from '@/server/auth';
 import {
@@ -7,7 +7,7 @@ import {
   updateMoneyTransaction
 } from '@/features/transactions/service';
 import { jsonMutationWithSnapshot, readRouteId } from '@/server/route-helpers';
-import { jsonError, jsonErrorFromUnknown } from '@/shared/result';
+import { jsonError, jsonErrorFromUnknown, jsonOk } from '@/shared/result';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -23,7 +23,7 @@ export async function GET(
   const id = await readRouteId(params);
 
   try {
-    return NextResponse.json(await getMoneyTransaction({ id }));
+    return jsonOk(await getMoneyTransaction({ id }));
   } catch (error) {
     return jsonErrorFromUnknown(error, 'Invalid transaction');
   }

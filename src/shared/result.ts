@@ -10,10 +10,11 @@ export type AppErrorCode =
 
 export type AppError = {
   code: AppErrorCode;
+  details?: Record<string, unknown>;
   message: string;
 };
 
-export type AppResult<T> =
+export type ApiResponse<T> =
   | {
       ok: true;
       data: T;
@@ -22,6 +23,8 @@ export type AppResult<T> =
       ok: false;
       error: AppError;
     };
+
+export type AppResult<T> = ApiResponse<T>;
 
 export class AppException extends Error {
   readonly code: AppErrorCode;
@@ -86,8 +89,7 @@ export function jsonError(error: AppError) {
   return NextResponse.json(
     {
       ok: false,
-      code: error.code,
-      message: error.message
+      error
     },
     { status: errorStatus(error.code) }
   );
@@ -95,6 +97,13 @@ export function jsonError(error: AppError) {
 
 export function jsonErrorFromUnknown(error: unknown, fallback?: string) {
   return jsonError(appErrorFromUnknown(error, fallback));
+}
+
+export function jsonOk<T>(data: T) {
+  return NextResponse.json<ApiResponse<T>>({
+    ok: true,
+    data
+  });
 }
 
 function inferErrorCode(error: unknown): AppErrorCode {

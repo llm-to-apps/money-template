@@ -18,6 +18,7 @@ import type {
   MoneySnapshot,
   WalletRecord
 } from '@/shared/money-types';
+import type { ApiResponse } from '@/shared/result';
 
 type MutationFormHandler = (event: FormEvent<HTMLFormElement>) => void;
 
@@ -113,10 +114,16 @@ function WalletEditView({
           throw new Error('wallet not found');
         }
 
-        const payload = (await response.json()) as { wallet: WalletRecord };
+        const payload = (await response.json()) as ApiResponse<{
+          wallet: WalletRecord;
+        }>;
+
+        if (!payload.ok) {
+          throw new Error('wallet not found');
+        }
 
         if (isCurrent) {
-          setWallet(payload.wallet);
+          setWallet(payload.data.wallet);
           setStatus('idle');
         }
       } catch {

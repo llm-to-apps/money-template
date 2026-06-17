@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
 import { listMoneyTransactions } from '@/features/transactions/service';
 import { getCurrentUser } from '@/server/auth';
-import { jsonError, jsonErrorFromUnknown } from '@/shared/result';
+import { jsonError, jsonErrorFromUnknown, jsonOk } from '@/shared/result';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    return NextResponse.json(
+    return jsonOk(
       await listMoneyTransactions(
         Object.fromEntries(request.nextUrl.searchParams.entries())
       )

@@ -15,7 +15,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:sqlite": "npm run db:test:reset && DATABASE_URL=file:./test-e2e.db RUN_DB_E2E=1 MONEY_AUTH_MODE=local MONEY_DEV_MCP_TOKEN=dev-money-token npm run test:e2e",
+    "test:e2e:sqlite": "npm run db:test:reset && DATABASE_URL=file:./test-e2e.db RUN_DB_E2E=1 NEXT_DIST_DIR=.next-e2e MONEY_AUTH_MODE=local MONEY_DEV_MCP_TOKEN=dev-money-token npm run test:e2e",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "RUST_LOG=info node scripts/prisma.mjs generate",
     "prisma:validate": "DATABASE_URL=${DATABASE_URL:-mysql://user:password@localhost:3306/money} RUST_LOG=info node scripts/prisma.mjs validate",

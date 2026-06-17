@@ -14,6 +14,7 @@ import type {
   MoneySnapshot,
   MoneyUser
 } from '@/shared/money-types';
+import type { ApiResponse } from '@/shared/result';
 
 export function useMoneySnapshot({ initialUser }: { initialUser: MoneyUser }) {
   const [snapshot, setSnapshot] = useState<MoneySnapshot | null>(null);
@@ -37,7 +38,9 @@ export function useMoneySnapshot({ initialUser }: { initialUser: MoneyUser }) {
           const payload = (await response
             .json()
             .catch(() => null)) as AuthErrorPayload | null;
-          window.location.replace(payload?.redirectTo ?? '/auth/login');
+          window.location.replace(
+            payload?.error?.details?.redirectTo ?? '/auth/login'
+          );
           return;
         }
 
@@ -46,7 +49,15 @@ export function useMoneySnapshot({ initialUser }: { initialUser: MoneyUser }) {
           return;
         }
 
-        const nextSnapshot = (await response.json()) as MoneyDashboardPayload;
+        const payload =
+          (await response.json()) as ApiResponse<MoneyDashboardPayload>;
+
+        if (!payload.ok) {
+          setError(payload.error.message);
+          return;
+        }
+
+        const nextSnapshot = payload.data;
         startTransition(() => {
           setSnapshot({
             categories: nextSnapshot.categories,

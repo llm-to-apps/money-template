@@ -21,8 +21,8 @@ test.describe('database-backed API flows', () => {
       }
     });
     expect(walletResponse.ok()).toBe(true);
-    const walletSnapshot = await walletResponse.json();
-    const wallet = walletSnapshot.wallets.find(
+    const walletPayload = await walletResponse.json();
+    const wallet = walletPayload.data.wallets.find(
       (item: { name: string }) => item.name === walletName
     );
     expect(wallet).toBeTruthy();
@@ -34,8 +34,8 @@ test.describe('database-backed API flows', () => {
       }
     });
     expect(categoryResponse.ok()).toBe(true);
-    const categorySnapshot = await categoryResponse.json();
-    const category = categorySnapshot.categories.find(
+    const categoryPayload = await categoryResponse.json();
+    const category = categoryPayload.data.categories.find(
       (item: { name: string }) => item.name === categoryName
     );
     expect(category).toBeTruthy();
@@ -52,13 +52,15 @@ test.describe('database-backed API flows', () => {
     });
     expect(transactionResponse.ok()).toBe(true);
     await expect(transactionResponse.json()).resolves.toMatchObject({
-      initialTransactionsPage: {
-        transactions: expect.arrayContaining([
-          expect.objectContaining({
-            note: `API transaction ${suffix}`,
-            walletId: wallet.id
-          })
-        ])
+      data: {
+        initialTransactionsPage: {
+          transactions: expect.arrayContaining([
+            expect.objectContaining({
+              note: `API transaction ${suffix}`,
+              walletId: wallet.id
+            })
+          ])
+        }
       }
     });
   });

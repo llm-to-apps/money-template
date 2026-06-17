@@ -42,7 +42,10 @@ describe('wallet detail API route', () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
-      wallet: { id: 'wallet_1' }
+      data: {
+        wallet: { id: 'wallet_1' }
+      },
+      ok: true
     });
     expect(mocks.getMoneyWallet).toHaveBeenCalledWith({ id: 'wallet_1' });
   });

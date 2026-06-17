@@ -58,7 +58,10 @@ describe('transaction detail API route', () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
-      transaction: { id: 'transaction_1' }
+      data: {
+        transaction: { id: 'transaction_1' }
+      },
+      ok: true
     });
     expect(mocks.getMoneyTransaction).toHaveBeenCalledWith({
       id: 'transaction_1'

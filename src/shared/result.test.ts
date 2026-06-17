@@ -5,6 +5,7 @@ import {
   errorStatus,
   fail,
   jsonError,
+  jsonOk,
   ok
 } from './result';
 
@@ -53,8 +54,20 @@ describe('result helpers', () => {
     expect(response.status).toBe(429);
     await expect(response.json()).resolves.toEqual({
       ok: false,
-      code: 'RATE_LIMITED',
-      message: 'Too many requests'
+      error: {
+        code: 'RATE_LIMITED',
+        message: 'Too many requests'
+      }
+    });
+  });
+
+  it('serializes JSON success responses', async () => {
+    const response = jsonOk({ id: 'item_1' });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      ok: true,
+      data: { id: 'item_1' }
     });
   });
 });

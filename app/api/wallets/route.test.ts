@@ -35,7 +35,10 @@ describe('wallet API route', () => {
     mocks.authorizeMoneyMutation.mockResolvedValue({
       ok: false,
       response: Response.json(
-        { code: 'UNAUTHORIZED', message: 'Unauthorized', ok: false },
+        {
+          error: { code: 'UNAUTHORIZED', message: 'Unauthorized' },
+          ok: false
+        },
         { status: 401 }
       )
     });
@@ -50,8 +53,10 @@ describe('wallet API route', () => {
     );
 
     await expect(response.json()).resolves.toMatchObject({
-      code: 'UNAUTHORIZED',
-      message: 'Unauthorized',
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Unauthorized'
+      },
       ok: false
     });
     expect(response.status).toBe(401);
@@ -79,7 +84,10 @@ describe('wallet API route', () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
-      wallets: [{ id: 'wallet_new', name: 'Savings' }]
+      data: {
+        wallets: [{ id: 'wallet_new', name: 'Savings' }]
+      },
+      ok: true
     });
     expect(mocks.auditMoneyMutation).toHaveBeenCalledWith(
       expect.objectContaining({

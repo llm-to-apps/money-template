@@ -10,7 +10,7 @@ const eslintConfig = [
     }
   },
   {
-    ignores: ['.next/**', 'coverage/**', 'node_modules/**']
+    ignores: ['.next/**', '.next-e2e/**', 'coverage/**', 'node_modules/**']
   }
 ];
 
