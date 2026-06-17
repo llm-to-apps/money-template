@@ -37,7 +37,6 @@ describe('server env helpers', () => {
 
   it('normalizes URL helpers and headers', async () => {
     process.env = {
-      APP_PUBLIC_URL: 'https://money.example.com///',
       AUTH_SECRET: 'secret',
       NODE_ENV: 'test',
       OAUTH_AUTHORIZE_URL: 'https://auth.example.com/authorize',
@@ -46,7 +45,6 @@ describe('server env helpers', () => {
       OAUTH_INTERNAL_TOKEN_URL: 'https://auth.internal/token',
       OAUTH_INTERNAL_USERINFO_URL: 'https://auth.internal/userinfo',
       OAUTH_ISSUER_URL: 'https://issuer.example.com/oauth',
-      OAUTH_REDIRECT_URI: 'https://money.example.com/auth/callback',
       OAUTH_REQUEST_HOST: 'money.example.com',
       OS7_PROJECT_TOKEN_INTROSPECTION_URL: 'https://auth.internal/introspect',
       PROJECT_ID: 'project_1',
@@ -56,7 +54,6 @@ describe('server env helpers', () => {
 
     const env = await import('./env');
 
-    expect(env.appPublicUrl()).toBe('https://money.example.com');
     expect(env.authSecret()).toBe('secret');
     expect(env.oauthAuthorizeUrl()).toBe('https://auth.example.com/authorize');
     expect(env.oauthClientId()).toBe('client-id');
@@ -66,9 +63,6 @@ describe('server env helpers', () => {
       'https://auth.internal/userinfo'
     );
     expect(env.oauthIssuerOrigin()).toBe('https://issuer.example.com');
-    expect(env.oauthRedirectUri()).toBe(
-      'https://money.example.com/auth/callback'
-    );
     expect(env.os7RequestHostHeader()).toEqual({ host: 'money.example.com' });
     expect(env.projectId()).toBe('project_1');
     expect(env.projectTokenIntrospectionUrl()).toBe(

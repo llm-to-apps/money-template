@@ -11,8 +11,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
+  const origin = await publicOrigin();
   const redirectUrl = await createLoginRedirectUrl(
-    publicOrigin(),
+    origin,
     request.nextUrl.searchParams.get('interactive') !== '1'
   );
 

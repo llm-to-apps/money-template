@@ -3,7 +3,6 @@ import 'server-only';
 import { z } from 'zod';
 
 const envSchema = z.object({
-  APP_PUBLIC_URL: z.string().url().optional(),
   AUTH_SECRET: z.string().min(1).optional(),
   MONEY_AUTH_MODE: z.enum(['oauth', 'local']).default('oauth'),
   MONEY_DEV_MCP_TOKEN: z.string().min(1).optional(),
@@ -18,7 +17,6 @@ const envSchema = z.object({
   OAUTH_INTERNAL_TOKEN_URL: z.string().url().optional(),
   OAUTH_INTERNAL_USERINFO_URL: z.string().url().optional(),
   OAUTH_ISSUER_URL: z.string().url().optional(),
-  OAUTH_REDIRECT_URI: z.string().url().optional(),
   OAUTH_REQUEST_HOST: z.string().min(1).optional(),
   OS7_PROJECT_TOKEN_INTROSPECTION_URL: z.string().url().optional(),
   PROJECT_ID: z.string().min(1).optional(),
@@ -76,10 +74,6 @@ export function moneyDevMcpToken() {
   return env().MONEY_DEV_MCP_TOKEN ?? null;
 }
 
-export function appPublicUrl() {
-  return requiredEnv('APP_PUBLIC_URL').replace(/\/+$/, '');
-}
-
 export function oauthClientId() {
   return requiredEnv('OAUTH_CLIENT_ID');
 }
@@ -102,10 +96,6 @@ export function oauthInternalUserinfoUrl() {
 
 export function oauthIssuerOrigin() {
   return new URL(requiredEnv('OAUTH_ISSUER_URL')).origin;
-}
-
-export function oauthRedirectUri() {
-  return requiredEnv('OAUTH_REDIRECT_URI');
 }
 
 export function os7RequestHostHeader(): Record<string, string> {

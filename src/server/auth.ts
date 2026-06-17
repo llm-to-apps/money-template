@@ -15,7 +15,6 @@ import {
   oauthInternalTokenUrl,
   oauthInternalUserinfoUrl,
   oauthIssuerOrigin,
-  oauthRedirectUri,
   os7RequestHostHeader
 } from './env';
 
@@ -41,6 +40,7 @@ type OAuthUserInfo = {
 export async function createOAuthRequest(origin: string) {
   ensureOAuthAuthMode();
   const state = createSignedOAuthState();
+  const redirectUri = oauthRedirectUri(origin);
   const cookieStore = await cookies();
   cookieStore.set(oauthStateCookie, state, {
     httpOnly: true,
@@ -53,14 +53,14 @@ export async function createOAuthRequest(origin: string) {
     clientId: oauthClientId(),
     origin,
     parentOrigin: oauthIssuerOrigin(),
-    redirectUri: oauthRedirectUri(),
+    redirectUri,
     state
   });
 
   return {
     clientId: oauthClientId(),
     parentOrigin: oauthIssuerOrigin(),
-    redirectUri: oauthRedirectUri(),
+    redirectUri,
     scope: 'openid email profile',
     state
   };
@@ -102,7 +102,7 @@ export async function handleOAuthCallback({
   });
   await verifyOAuthState(state);
   logInfo('[Money Auth] state verified', { state });
-  const accessToken = await exchangeCodeForAccessToken(code);
+  const accessToken = await exchangeCodeForAccessToken(code, origin);
   logInfo('[Money Auth] token exchange complete', { state });
   const userInfo = await fetchUserInfo(accessToken);
   logInfo('[Money Auth] userinfo fetched', {
@@ -301,11 +301,11 @@ async function verifyOAuthState(state: string) {
   }
 }
 
-async function exchangeCodeForAccessToken(code: string) {
+async function exchangeCodeForAccessToken(code: string, origin: string) {
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
     code,
-    redirect_uri: oauthRedirectUri(),
+    redirect_uri: oauthRedirectUri(origin),
     client_id: oauthClientId(),
     client_secret: oauthClientSecret()
   });
@@ -373,6 +373,10 @@ async function fetchUserInfo(accessToken: string) {
 
 function hashSessionToken(value: string) {
   return createHmac('sha256', authSecret()).update(value).digest('base64url');
+}
+
+function oauthRedirectUri(origin: string) {
+  return `${origin.replace(/\/+$/, '')}/api/auth/callback/os7`;
 }
 
 function createSignedOAuthState() {

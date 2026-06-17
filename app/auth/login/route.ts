@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  const origin = publicOrigin();
+  const origin = await publicOrigin();
   const oauthRequest = await createOAuthRequest(origin);
   logInfo('[Money OAuth Login] rendered bridge login', {
     clientId: oauthRequest.clientId,

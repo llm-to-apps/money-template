@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.redirect(
-    new URL('/auth/signed-out', publicOrigin()),
+    new URL('/auth/signed-out', await publicOrigin()),
     303
   );
 }
