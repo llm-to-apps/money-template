@@ -19,7 +19,7 @@ ENV APP_RESTORE_COMMAND="npm ci"
 ENV APP_STARTUP_COMMANDS="npm run prisma:generate && npm run db:deploy && npm run db:seed"
 ENV APP_MODE=prod
 ENV APP_COMMAND="NODE_ENV=production npm run start"
-ENV APP_DEV_COMMAND="node_modules/.bin/next dev --hostname 0.0.0.0 --port 8080"
+ENV APP_DEV_COMMAND="node_modules/.bin/next dev --hostname 0.0.0.0 --port 4046"
 ENV APP_DEV_IDLE_TIMEOUT_SECONDS=60
 ENV APP_BUILD_COMMAND="NODE_ENV=production npm run build"
 ENV APP_PROD_COMMAND="NODE_ENV=production npm run start"
@@ -41,6 +41,6 @@ COPY AGENT.md README.md .gitignore ./
 
 RUN NODE_ENV=production npm run build
 
-EXPOSE 80 8080 7070
+EXPOSE 80 4046 7070
 
 ENTRYPOINT ["agent-tools"]

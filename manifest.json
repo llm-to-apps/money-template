@@ -25,7 +25,7 @@
   "runtime": {
     "workdir": "/workspace",
     "appPort": 80,
-    "devPort": 8080,
+    "devPort": 4046,
     "agentPort": 7070,
     "restoreCommand": "npm ci",
     "startupCommands": "npm run prisma:generate && npm run db:deploy && npm run db:seed"
