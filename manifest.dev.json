@@ -25,15 +25,15 @@
   "runtime": {
     "workdir": "/workspace",
     "appPort": 80,
+    "devPort": 8080,
     "agentPort": 7070,
-    "restoreCommand": "npm install",
-    "startupCommands": "npm run prisma:generate && npm run db:deploy && npm run db:seed",
-    "appCommand": "npm run dev:docker"
+    "restoreCommand": "npm ci",
+    "startupCommands": "npm run prisma:generate && npm run db:deploy && npm run db:seed"
   },
   "resources": {
     "memory": {
-      "reservationMb": 128,
-      "limitMb": 1024
+      "reservationMb": 256,
+      "limitMb": 2048
     },
     "cpu": {
       "reservation": 0.05,

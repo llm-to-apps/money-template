@@ -1,16 +1,6 @@
-ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-038d34c
+ARG AGENT_TOOLS_IMAGE=ghcr.io/llm-to-apps/agent-tools:sha-1d69c45
 
 FROM ${AGENT_TOOLS_IMAGE} AS agent-tools
-
-FROM node:22-alpine AS deps
-
-WORKDIR /app
-
-COPY package.json package-lock.json ./
-COPY prisma ./prisma
-COPY scripts ./scripts
-RUN npm ci
-RUN npm run prisma:generate
 
 FROM node:22-alpine AS runtime
 
@@ -25,9 +15,15 @@ ENV HOSTNAME=0.0.0.0
 ENV AGENT_WORKDIR=/workspace
 ENV AGENT_TOOLS_PORT=7070
 ENV NODE_ENV=development
-ENV APP_RESTORE_COMMAND="npm install"
+ENV APP_RESTORE_COMMAND="npm ci"
 ENV APP_STARTUP_COMMANDS="npm run prisma:generate && npm run db:deploy && npm run db:seed"
-ENV APP_COMMAND="npm run dev:docker"
+ENV APP_MODE=prod
+ENV APP_COMMAND="NODE_ENV=production npm run start"
+ENV APP_DEV_COMMAND="node_modules/.bin/next dev --hostname 0.0.0.0 --port 8080"
+ENV APP_DEV_IDLE_TIMEOUT_SECONDS=60
+ENV APP_BUILD_COMMAND="NODE_ENV=production npm run build"
+ENV APP_PROD_COMMAND="NODE_ENV=production npm run start"
+ENV GIT_PRESERVE_PATHS="node_modules:.next"
 
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
@@ -43,6 +39,8 @@ COPY next.config.ts ./next.config.ts
 COPY tsconfig.json ./
 COPY AGENT.md README.md .gitignore ./
 
-EXPOSE 80 7070
+RUN NODE_ENV=production npm run build
+
+EXPOSE 80 8080 7070
 
 ENTRYPOINT ["agent-tools"]
