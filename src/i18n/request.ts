@@ -13,11 +13,12 @@ export default getRequestConfig(async () => {
   const [cookieStore, headerStore] = await Promise.all([cookies(), headers()]);
   const headerLocale = headerStore.get(localeHeaderName);
   const cookieLocale = cookieStore.get(localeCookieName)?.value;
-  const locale = headerLocale && isLocale(headerLocale)
-    ? headerLocale
-    : cookieLocale && isLocale(cookieLocale)
-      ? cookieLocale
-      : localeFromAcceptLanguage(headerStore.get('accept-language'));
+  const locale =
+    headerLocale && isLocale(headerLocale)
+      ? headerLocale
+      : cookieLocale && isLocale(cookieLocale)
+        ? cookieLocale
+        : localeFromAcceptLanguage(headerStore.get('accept-language'));
 
   return {
     locale,

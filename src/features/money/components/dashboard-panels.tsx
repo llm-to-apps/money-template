@@ -47,7 +47,10 @@ function SummaryCards({ snapshot }: { snapshot: MoneySnapshot }) {
         value={formatMoney(snapshot.summary.currentMonth.incomeCents, locale)}
         color="green"
         description={dashboard('net', {
-          amount: formatMoney(snapshot.summary.currentMonth.balanceCents, locale)
+          amount: formatMoney(
+            snapshot.summary.currentMonth.balanceCents,
+            locale
+          )
         })}
         trend={snapshot.monthDynamics.map((month) => month.incomeCents)}
       />
@@ -160,7 +163,9 @@ function CategorySpendPanel({ snapshot }: { snapshot: MoneySnapshot }) {
           dataKey="category"
           gridAxis="x"
           orientation="vertical"
-          series={[{ name: 'amount', label: common('amount'), color: 'blue.6' }]}
+          series={[
+            { name: 'amount', label: common('amount'), color: 'blue.6' }
+          ]}
           tickLine="none"
           valueFormatter={(value) => formatMoney(value, locale)}
           withTooltip

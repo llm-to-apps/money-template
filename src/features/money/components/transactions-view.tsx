@@ -149,7 +149,10 @@ export function TransactionsList({ snapshot }: { snapshot: MoneySnapshot }) {
   }, [loadNextPage]);
 
   return (
-    <TablePanel actionHref="/transactions/new" actionLabel={transactions('add')}>
+    <TablePanel
+      actionHref="/transactions/new"
+      actionLabel={transactions('add')}
+    >
       <DataTable<TransactionRecord>
         borderRadius="md"
         highlightOnHover

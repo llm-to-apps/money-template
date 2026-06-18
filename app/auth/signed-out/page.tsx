@@ -29,15 +29,15 @@ export default async function SignedOutPage() {
             {auth('signedOutTitle')}
           </Title>
           <Text c="dimmed">
-            {isLocalAuth
-              ? auth('localDescription')
-              : auth('os7Description')}
+            {isLocalAuth ? auth('localDescription') : auth('os7Description')}
           </Text>
           <Button
             component="a"
             href="/api/auth/login?interactive=1"
             aria-label={
-              isLocalAuth ? auth('continueAsLocalAria') : auth('continueWithOs7')
+              isLocalAuth
+                ? auth('continueAsLocalAria')
+                : auth('continueWithOs7')
             }
             color="dark"
             variant="default"
