@@ -44,6 +44,28 @@ client application while staying simple enough for agents to safely extend.
 - The dashboard should be readable at a glance and should prioritize the next
   useful action.
 
+## Internationalization
+
+Money must support English, German, and Russian UI localization.
+
+Rules:
+
+- Do not add locale prefixes to routes. Money routes must remain stable, such as
+  `/`, `/transactions`, `/wallets`, and `/categories`.
+- Store the selected locale in app state or a cookie and fall back to the
+  browser `Accept-Language` preference when no explicit selection exists.
+- If the URL includes `?lang=en`, `?lang=de`, or `?lang=ru`, that query
+  parameter takes priority for the current request and must be saved immediately
+  as the selected locale cookie for future requests.
+- Localize all user-facing UI strings, including navigation, form labels,
+  placeholders, buttons, empty states, errors, loading screens, auth screens,
+  chart labels, metadata, and the app display name.
+- Format dates, numbers, and currency values with the active locale.
+- Do not translate user-authored data such as wallet names, category names,
+  comments, transaction notes, or imported financial records.
+- Keep API, MCP, database, and audit identifiers stable unless a user-visible
+  string is explicitly part of the contract.
+
 ## Motion And Interaction
 
 Money should use calm, consistent motion to make the interface feel responsive

@@ -171,6 +171,31 @@ AI agents.
 - Use typed runtime validation for route, service, and MCP inputs.
 - Keep public API DTO types in `src/shared/api.ts`, pure app result/error logic
   in `src/shared/result.ts`, and Next response helpers in `src/server/http.ts`.
+- Implement app internationalization with `next-intl`. Keep supported locales,
+  locale guards, and locale detection helpers under `src/i18n/`; keep locale
+  messages in `messages/<locale>.json`; provide translations to Client
+  Components through `NextIntlClientProvider`; use `useTranslations` in Client
+  Components and `getTranslations` in Server Components, route boundaries, and
+  metadata.
+- Do not add locale prefixes to app routes unless the product specification
+  explicitly requires localized URLs. For OS7 app-style templates, keep routes
+  stable (`/`, `/transactions`, `/wallets`, etc.), store the selected locale in
+  a cookie or app state, and fall back to `Accept-Language`.
+- If an app supports query-parameter locale handoff, treat `?lang=<locale>` as
+  higher priority than the cookie and `Accept-Language`; validate the locale,
+  apply it to the current request, and persist it immediately to the locale
+  cookie.
+- When adding or changing user-facing UI, update all supported locale message
+  files in the same change. User-facing UI includes navigation, app display
+  names, metadata, labels, placeholders, buttons, empty states, loading text,
+  auth screens, error states, validation copy, table headers, chart labels, and
+  action menu labels.
+- Format dates, numbers, lists, and currencies with the active locale. Avoid
+  hardcoded locale strings such as `en-US` inside shared UI utilities unless
+  they are explicit fallbacks.
+- Do not translate user-authored or persisted business data such as wallet
+  names, category names, comments, transaction notes, imported records, or
+  stable API/MCP/database/audit identifiers.
 - Do not use misleading collection names. A bounded page of transactions must be
   named like `initialTransactionsPage`, not `transactions`.
 - Large lists must be bounded and cursor-paginated before they can grow without

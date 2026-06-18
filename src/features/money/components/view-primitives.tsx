@@ -14,6 +14,7 @@ import {
 } from '@mantine/core';
 import type { MantineTheme } from '@mantine/core';
 import { ChevronRight, Home, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import type {
   CategoryRecord,
@@ -54,6 +55,8 @@ export function MoneyBreadcrumbs({
 }: {
   items: Array<{ href?: string; label: string }>;
 }) {
+  const common = useTranslations('Common');
+
   return (
     <Breadcrumbs separator={<ChevronRight size={14} />}>
       {items.map((item, index) =>
@@ -66,7 +69,7 @@ export function MoneyBreadcrumbs({
             size="compact-sm"
             leftSection={item.href === '/' ? <Home size={15} /> : undefined}
           >
-            {item.href === '/' ? 'Home' : item.label}
+            {item.href === '/' ? common('home') : item.label}
           </Button>
         ) : (
           <Text key={`${item.label}-${index}`} c="dimmed">

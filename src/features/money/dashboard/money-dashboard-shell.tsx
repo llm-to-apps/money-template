@@ -14,9 +14,11 @@ import {
   Text
 } from '@mantine/core';
 import { LayoutDashboard, ReceiptText, Tags, WalletCards } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Os7Logo, os7Brand } from '@os7/ui-kit/os7-brand';
 
+import { LocaleSwitcher } from '@/features/money/components/locale-switcher';
 import { UserMenu } from '@/features/money/components/user-menu';
 import type { MoneyView } from '@/shared/money-types';
 
@@ -25,6 +27,7 @@ type MoneyDashboardShellProps = {
   currentView: MoneyView;
   displayName: string;
   isEmbedded: boolean;
+  isLocaleLocked: boolean;
   mobileNavOpened: boolean;
   onCloseMobileNav: () => void;
   onToggleMobileNav: () => void;
@@ -35,10 +38,22 @@ export function MoneyDashboardShell({
   currentView,
   displayName,
   isEmbedded,
+  isLocaleLocked,
   mobileNavOpened,
   onCloseMobileNav,
   onToggleMobileNav
 }: MoneyDashboardShellProps) {
+  const navigation = useTranslations('Navigation');
+  const shell = useTranslations('Shell');
+  const app = useTranslations('App');
+
+  const moneyNavItems = getMoneyNavItems({
+    categories: navigation('categories'),
+    dashboard: navigation('dashboard'),
+    transactions: navigation('transactions'),
+    wallets: navigation('wallets')
+  });
+
   return (
     <AppShell
       header={{ height: 64 }}
@@ -67,10 +82,10 @@ export function MoneyDashboardShell({
                 onClick={onToggleMobileNav}
                 hiddenFrom="sm"
                 size="sm"
-                aria-label="Open navigation"
+                aria-label={shell('openNavigation')}
               />
               <Badge radius="md" size="lg" variant="outline">
-                Money
+                {app('name')}
               </Badge>
             </Group>
 
@@ -107,6 +122,7 @@ export function MoneyDashboardShell({
             </Box>
 
             <Group h="100%" justify="flex-end" wrap="nowrap">
+              {!isLocaleLocked ? <LocaleSwitcher /> : null}
               <UserMenu displayName={displayName} isEmbedded={isEmbedded} />
             </Group>
           </Box>
@@ -137,7 +153,7 @@ export function MoneyDashboardShell({
         <Container h="100%">
           <Group h="100%" justify="space-between">
             <Text size="xs" c="dimmed">
-              Track income, expenses, and monthly cash flow.
+              {shell('footer')}
             </Text>
             <Os7Logo h={18} href={os7Brand.siteHref} target="_blank" />
           </Group>
@@ -147,34 +163,41 @@ export function MoneyDashboardShell({
   );
 }
 
-const moneyNavItems: Array<{
+function getMoneyNavItems(labels: {
+  categories: string;
+  dashboard: string;
+  transactions: string;
+  wallets: string;
+}): Array<{
   href: string;
   icon: ReactNode;
   label: string;
   view: MoneyView;
-}> = [
-  {
-    href: '/',
-    icon: <LayoutDashboard size={16} />,
-    label: 'Dashboard',
-    view: 'dashboard'
-  },
-  {
-    href: '/transactions',
-    icon: <ReceiptText size={16} />,
-    label: 'Transactions',
-    view: 'transactions'
-  },
-  {
-    href: '/wallets',
-    icon: <WalletCards size={16} />,
-    label: 'Wallets',
-    view: 'wallets'
-  },
-  {
-    href: '/categories',
-    icon: <Tags size={16} />,
-    label: 'Categories',
-    view: 'categories'
-  }
-];
+}> {
+  return [
+    {
+      href: '/',
+      icon: <LayoutDashboard size={16} />,
+      label: labels.dashboard,
+      view: 'dashboard'
+    },
+    {
+      href: '/transactions',
+      icon: <ReceiptText size={16} />,
+      label: labels.transactions,
+      view: 'transactions'
+    },
+    {
+      href: '/wallets',
+      icon: <WalletCards size={16} />,
+      label: labels.wallets,
+      view: 'wallets'
+    },
+    {
+      href: '/categories',
+      icon: <Tags size={16} />,
+      label: labels.categories,
+      view: 'categories'
+    }
+  ];
+}

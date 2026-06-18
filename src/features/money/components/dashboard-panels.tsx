@@ -10,6 +10,7 @@ import {
   Title
 } from '@mantine/core';
 import { BarChart, Sparkline } from '@mantine/charts';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { ColorDot } from '@/features/money/components/view-primitives';
 import type { MoneySnapshot } from '@/shared/money-types';
@@ -30,26 +31,36 @@ export function DashboardPanels({ snapshot }: { snapshot: MoneySnapshot }) {
 }
 
 function SummaryCards({ snapshot }: { snapshot: MoneySnapshot }) {
+  const locale = useLocale();
+  const dashboard = useTranslations('Dashboard');
+
   return (
     <SimpleGrid cols={{ base: 1, sm: 3 }}>
       <StatCard
-        label="Balance"
-        value={formatMoney(snapshot.summary.balanceCents)}
+        label={dashboard('balance')}
+        value={formatMoney(snapshot.summary.balanceCents, locale)}
         color={snapshot.summary.balanceCents >= 0 ? 'green' : 'red'}
         trend={snapshot.monthDynamics.map((month) => month.balanceCents)}
       />
       <StatCard
-        label="This month"
-        value={formatMoney(snapshot.summary.currentMonth.incomeCents)}
+        label={dashboard('thisMonth')}
+        value={formatMoney(snapshot.summary.currentMonth.incomeCents, locale)}
         color="green"
-        description={`Net ${formatMoney(snapshot.summary.currentMonth.balanceCents)}`}
+        description={dashboard('net', {
+          amount: formatMoney(snapshot.summary.currentMonth.balanceCents, locale)
+        })}
         trend={snapshot.monthDynamics.map((month) => month.incomeCents)}
       />
       <StatCard
-        label="Month expenses"
-        value={formatMoney(snapshot.summary.currentMonth.expensesCents)}
+        label={dashboard('monthExpenses')}
+        value={formatMoney(snapshot.summary.currentMonth.expensesCents, locale)}
         color="red"
-        description={`Previous ${formatMoney(snapshot.summary.previousMonth.expensesCents)}`}
+        description={dashboard('previous', {
+          amount: formatMoney(
+            snapshot.summary.previousMonth.expensesCents,
+            locale
+          )
+        })}
         trend={snapshot.monthDynamics.map((month) => month.expensesCents)}
       />
     </SimpleGrid>
@@ -97,10 +108,13 @@ function StatCard({
 }
 
 function WalletsPanel({ snapshot }: { snapshot: MoneySnapshot }) {
+  const locale = useLocale();
+  const dashboard = useTranslations('Dashboard');
+
   return (
     <Card withBorder shadow="sm" radius="md">
       <Title order={2} size="h4" mb="md">
-        Wallets
+        {dashboard('wallets')}
       </Title>
       <Stack gap="sm">
         {snapshot.wallets.map((wallet) => (
@@ -115,7 +129,7 @@ function WalletsPanel({ snapshot }: { snapshot: MoneySnapshot }) {
                 </Text>
               </Box>
             </Group>
-            <Text fw={700}>{formatMoney(wallet.balanceCents)}</Text>
+            <Text fw={700}>{formatMoney(wallet.balanceCents, locale)}</Text>
           </Group>
         ))}
       </Stack>
@@ -124,6 +138,9 @@ function WalletsPanel({ snapshot }: { snapshot: MoneySnapshot }) {
 }
 
 function CategorySpendPanel({ snapshot }: { snapshot: MoneySnapshot }) {
+  const locale = useLocale();
+  const common = useTranslations('Common');
+  const dashboard = useTranslations('Dashboard');
   const data = snapshot.categoryBreakdown.slice(0, 8).map((category) => ({
     amount: category.amountCents,
     category: category.label
@@ -132,10 +149,10 @@ function CategorySpendPanel({ snapshot }: { snapshot: MoneySnapshot }) {
   return (
     <Card withBorder shadow="sm" radius="md">
       <Title order={2} size="h4" mb="md">
-        Category spend
+        {dashboard('categorySpend')}
       </Title>
       {data.length === 0 ? (
-        <Text c="dimmed">No expenses this month.</Text>
+        <Text c="dimmed">{dashboard('noExpensesThisMonth')}</Text>
       ) : (
         <BarChart
           h={Math.max(260, data.length * 44)}
@@ -143,11 +160,13 @@ function CategorySpendPanel({ snapshot }: { snapshot: MoneySnapshot }) {
           dataKey="category"
           gridAxis="x"
           orientation="vertical"
-          series={[{ name: 'amount', label: 'Amount', color: 'blue.6' }]}
+          series={[{ name: 'amount', label: common('amount'), color: 'blue.6' }]}
           tickLine="none"
-          valueFormatter={formatMoney}
+          valueFormatter={(value) => formatMoney(value, locale)}
           withTooltip
-          xAxisProps={{ tickFormatter: (value) => formatMoney(Number(value)) }}
+          xAxisProps={{
+            tickFormatter: (value) => formatMoney(Number(value), locale)
+          }}
           yAxisProps={{ width: 128 }}
         />
       )}
@@ -156,6 +175,9 @@ function CategorySpendPanel({ snapshot }: { snapshot: MoneySnapshot }) {
 }
 
 function TrendPanel({ snapshot }: { snapshot: MoneySnapshot }) {
+  const locale = useLocale();
+  const common = useTranslations('Common');
+  const dashboard = useTranslations('Dashboard');
   const data = snapshot.monthDynamics.map((month) => ({
     expenses: month.expensesCents,
     income: month.incomeCents,
@@ -165,17 +187,17 @@ function TrendPanel({ snapshot }: { snapshot: MoneySnapshot }) {
   return (
     <Card withBorder shadow="sm" radius="md">
       <Title order={2} size="h4" mb="md">
-        Monthly dynamics
+        {dashboard('monthlyDynamics')}
       </Title>
       <BarChart
         h={260}
         data={data}
         dataKey="month"
         series={[
-          { name: 'income', label: 'Income', color: 'green.6' },
-          { name: 'expenses', label: 'Expenses', color: 'red.6' }
+          { name: 'income', label: common('income'), color: 'green.6' },
+          { name: 'expenses', label: common('expenses'), color: 'red.6' }
         ]}
-        valueFormatter={formatMoney}
+        valueFormatter={(value) => formatMoney(value, locale)}
         tickLine="y"
         gridAxis="y"
         withLegend
@@ -185,14 +207,18 @@ function TrendPanel({ snapshot }: { snapshot: MoneySnapshot }) {
 }
 
 function TransactionsPanel({ snapshot }: { snapshot: MoneySnapshot }) {
+  const locale = useLocale();
+  const common = useTranslations('Common');
+  const dashboard = useTranslations('Dashboard');
+
   return (
     <Card withBorder shadow="sm" radius="md">
       <Title order={2} size="h4" mb="md">
-        Recent transactions
+        {dashboard('recentTransactions')}
       </Title>
       <Stack gap="sm">
         {snapshot.initialTransactionsPage.transactions.length === 0 ? (
-          <Text c="dimmed">No transactions yet.</Text>
+          <Text c="dimmed">{dashboard('noTransactionsYet')}</Text>
         ) : (
           snapshot.initialTransactionsPage.transactions
             .slice(0, 8)
@@ -201,8 +227,9 @@ function TransactionsPanel({ snapshot }: { snapshot: MoneySnapshot }) {
                 <Box>
                   <Text fw={600}>{transaction.category.label}</Text>
                   <Text c="dimmed">
-                    {transaction.wallet.name} · {transaction.note || 'No note'}{' '}
-                    · {formatDate(transaction.occurredAt)}
+                    {transaction.wallet.name} ·{' '}
+                    {transaction.note || common('noNote')} ·{' '}
+                    {formatDate(transaction.occurredAt, locale)}
                   </Text>
                 </Box>
                 <Text
@@ -210,7 +237,7 @@ function TransactionsPanel({ snapshot }: { snapshot: MoneySnapshot }) {
                   fw={700}
                 >
                   {transaction.type === 'INCOME' ? '+' : '-'}
-                  {formatMoney(transaction.amountCents)}
+                  {formatMoney(transaction.amountCents, locale)}
                 </Text>
               </Group>
             ))

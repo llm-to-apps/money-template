@@ -1,6 +1,7 @@
 'use client';
 
 import { Box, Card, Group, SimpleGrid, Skeleton, Stack } from '@mantine/core';
+import { useTranslations } from 'next-intl';
 
 import {
   homeCrumb,
@@ -17,18 +18,25 @@ export function RouteSkeleton({
   routeMode: MoneyRouteMode;
   view: MoneyView;
 }) {
+  const common = useTranslations('Common');
+  const navigation = useTranslations('Navigation');
+  const transactions = useTranslations('Transactions');
+  const wallets = useTranslations('Wallets');
+  const categories = useTranslations('Categories');
+
   if (view === 'transactions') {
     return routeMode.action === 'list' ? (
       <ListRouteSkeleton
         actionHref="/transactions/new"
-        actionLabel="Add transaction"
+        actionLabel={transactions('add')}
         columns={5}
-        label="Transactions"
+        label={navigation('transactions')}
       />
     ) : (
       <FormRouteSkeleton
         parentHref="/transactions"
-        parentLabel="Transactions"
+        parentLabel={navigation('transactions')}
+        title={common('edit')}
       />
     );
   }
@@ -37,12 +45,16 @@ export function RouteSkeleton({
     return routeMode.action === 'list' ? (
       <ListRouteSkeleton
         actionHref="/wallets/new"
-        actionLabel="Add wallet"
+        actionLabel={wallets('add')}
         columns={4}
-        label="Wallets"
+        label={navigation('wallets')}
       />
     ) : (
-      <FormRouteSkeleton parentHref="/wallets" parentLabel="Wallets" />
+      <FormRouteSkeleton
+        parentHref="/wallets"
+        parentLabel={navigation('wallets')}
+        title={common('edit')}
+      />
     );
   }
 
@@ -50,12 +62,16 @@ export function RouteSkeleton({
     return routeMode.action === 'list' ? (
       <ListRouteSkeleton
         actionHref="/categories/new"
-        actionLabel="Add category"
+        actionLabel={categories('add')}
         columns={3}
-        label="Categories"
+        label={navigation('categories')}
       />
     ) : (
-      <FormRouteSkeleton parentHref="/categories" parentLabel="Categories" />
+      <FormRouteSkeleton
+        parentHref="/categories"
+        parentLabel={navigation('categories')}
+        title={common('edit')}
+      />
     );
   }
 
@@ -117,10 +133,12 @@ export function FormSkeleton() {
 
 function FormRouteSkeleton({
   parentHref,
-  parentLabel
+  parentLabel,
+  title
 }: {
   parentHref: string;
   parentLabel: string;
+  title: string;
 }) {
   return (
     <ViewStack>
@@ -128,7 +146,7 @@ function FormRouteSkeleton({
         items={[
           homeCrumb,
           { href: parentHref, label: parentLabel },
-          { label: 'Edit' }
+          { label: title }
         ]}
       />
       <FormSkeleton />

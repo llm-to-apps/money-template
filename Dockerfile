@@ -32,10 +32,12 @@ RUN npm ci
 RUN npm run prisma:generate
 
 COPY app ./app
+COPY messages ./messages
 COPY public ./public
 COPY src ./src
 COPY ui-kit ./ui-kit
 COPY next.config.ts ./next.config.ts
+COPY proxy.ts ./proxy.ts
 COPY tsconfig.json ./
 COPY AGENT.md README.md .gitignore ./
 

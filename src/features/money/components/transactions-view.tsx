@@ -20,6 +20,7 @@ import {
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { DataTable } from 'mantine-datatable';
+import { useLocale, useTranslations } from 'next-intl';
 
 import {
   DeleteMenu,
@@ -62,6 +63,9 @@ const transactionPageSize = 12;
 
 export function TransactionsList({ snapshot }: { snapshot: MoneySnapshot }) {
   const router = useRouter();
+  const locale = useLocale();
+  const common = useTranslations('Common');
+  const transactions = useTranslations('Transactions');
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const initialTransactionsPage = snapshot.initialTransactionsPage;
   const [records, setRecords] = useState(initialTransactionsPage.transactions);
@@ -145,14 +149,14 @@ export function TransactionsList({ snapshot }: { snapshot: MoneySnapshot }) {
   }, [loadNextPage]);
 
   return (
-    <TablePanel actionHref="/transactions/new" actionLabel="Add transaction">
+    <TablePanel actionHref="/transactions/new" actionLabel={transactions('add')}>
       <DataTable<TransactionRecord>
         borderRadius="md"
         highlightOnHover
         idAccessor="id"
         fetching={isLoadingPage}
         minHeight={records.length === 0 ? 140 : undefined}
-        noRecordsText="No transactions yet."
+        noRecordsText={transactions('empty')}
         onRowClick={({ record }) =>
           router.push(`/transactions/${record.id}/edit`)
         }
@@ -161,33 +165,33 @@ export function TransactionsList({ snapshot }: { snapshot: MoneySnapshot }) {
         columns={[
           {
             accessor: 'category.label',
-            title: 'Category',
+            title: common('category'),
             render: (transaction) => (
               <Text fw={600}>{transaction.category.label}</Text>
             )
           },
           {
             accessor: 'wallet.name',
-            title: 'Wallet',
+            title: common('wallet'),
             visibleMediaQuery: desktopTableColumnQuery
           },
           {
             accessor: 'note',
-            title: 'Note',
+            title: common('note'),
             visibleMediaQuery: desktopTableColumnQuery,
             render: (transaction) => (
-              <Text c="dimmed">{transaction.note || 'No note'}</Text>
+              <Text c="dimmed">{transaction.note || common('noNote')}</Text>
             )
           },
           {
             accessor: 'occurredAt',
-            title: 'Date',
-            render: (transaction) => formatDate(transaction.occurredAt)
+            title: common('date'),
+            render: (transaction) => formatDate(transaction.occurredAt, locale)
           },
           {
             accessor: 'amountCents',
             noWrap: true,
-            title: 'Amount',
+            title: common('amount'),
             textAlign: 'right',
             render: (transaction) => (
               <Text
@@ -195,7 +199,7 @@ export function TransactionsList({ snapshot }: { snapshot: MoneySnapshot }) {
                 fw={700}
               >
                 {transaction.type === 'INCOME' ? '+' : '-'}
-                {formatMoney(transaction.amountCents)}
+                {formatMoney(transaction.amountCents, locale)}
               </Text>
             )
           }
@@ -203,11 +207,11 @@ export function TransactionsList({ snapshot }: { snapshot: MoneySnapshot }) {
       />
       <Group justify="space-between" mt="md">
         <Text c="dimmed" size="sm">
-          Showing {records.length} transactions
+          {transactions('shown', { count: records.length })}
         </Text>
         {isLoadingPage ? (
           <Text c="dimmed" size="sm">
-            Loading more...
+            {transactions('loadingMore')}
           </Text>
         ) : null}
       </Group>
@@ -233,13 +237,16 @@ export function TransactionForm({
   transaction: TransactionRecord;
   wallets: WalletRecord[];
 }) {
+  const common = useTranslations('Common');
+  const transactions = useTranslations('Transactions');
+
   return (
     <FormCard
       isBusy={isManaging}
       actions={
         <DeleteMenu
-          label="Transaction actions"
-          itemLabel="Delete transaction"
+          label={transactions('actions')}
+          itemLabel={transactions('delete')}
           disabled={isManaging}
           onDelete={() => onDeleteTransaction(transaction.id)}
         />
@@ -250,7 +257,7 @@ export function TransactionForm({
           <SimpleGrid cols={{ base: 1, sm: 2 }}>
             <TypeSelect defaultValue={transaction.type} />
             <NumberInput
-              label="Amount"
+              label={common('amount')}
               name="amount"
               defaultValue={transaction.amountCents / 100}
               min={0.01}
@@ -258,20 +265,20 @@ export function TransactionForm({
               required
             />
             <DateInput
-              label="Date"
+              label={common('date')}
               name="occurredAt"
               defaultValue={formatDateInputValue(transaction.occurredAt)}
               required
             />
             <Select
-              label="Wallet"
+              label={common('wallet')}
               hiddenInputProps={{ name: 'walletId' }}
               defaultValue={transaction.walletId}
               data={walletOptions(wallets, transaction.walletId)}
               required
             />
             <Select
-              label="Category"
+              label={common('category')}
               hiddenInputProps={{ name: 'categoryId' }}
               defaultValue={transaction.categoryId}
               data={categoryOptions(categories, transaction.categoryId)}
@@ -279,10 +286,10 @@ export function TransactionForm({
             />
           </SimpleGrid>
           <TextInput
-            label="Note"
+            label={common('note')}
             name="note"
             defaultValue={transaction.note ?? ''}
-            placeholder="Coffee, invoice, rent"
+            placeholder={transactions('notePlaceholder')}
           />
           <FormButtons cancelHref="/transactions" />
         </Stack>
@@ -308,6 +315,8 @@ export function AddTransactionForm({
   onSubmit: MutationFormHandler;
   wallets: WalletRecord[];
 }) {
+  const common = useTranslations('Common');
+  const transactions = useTranslations('Transactions');
   const mainCategories = useMemo(
     () => categories.filter((category) => !category.parentId),
     [categories]
@@ -349,7 +358,7 @@ export function AddTransactionForm({
           <SimpleGrid cols={{ base: 1, sm: 2 }}>
             <TypeSelect />
             <NumberInput
-              label="Amount"
+              label={common('amount')}
               name="amount"
               min={0.01}
               step={0.01}
@@ -357,13 +366,13 @@ export function AddTransactionForm({
               required
             />
             <DateInput
-              label="Date"
+              label={common('date')}
               name="occurredAt"
               defaultValue={todayDateInputValue()}
               required
             />
             <Select
-              label="Wallet"
+              label={common('wallet')}
               hiddenInputProps={{ name: 'walletId' }}
               defaultValue={defaultWalletId}
               data={wallets.map((wallet) => ({
@@ -373,7 +382,7 @@ export function AddTransactionForm({
               required
             />
             <Select
-              label="Category"
+              label={common('category')}
               value={mainCategoryId}
               onChange={(value) => {
                 if (!value) {
@@ -392,7 +401,7 @@ export function AddTransactionForm({
               required
             />
             <Select
-              label="Subcategory"
+              label={transactions('subcategory')}
               value={subcategoryId}
               onChange={(value) => setSubcategoryId(value ?? '')}
               disabled={subcategories.length === 0}
@@ -402,15 +411,15 @@ export function AddTransactionForm({
                       value: category.id,
                       label: category.name
                     }))
-                  : [{ value: '', label: 'No subcategories' }]
+                  : [{ value: '', label: transactions('subcategoriesEmpty') }]
               }
             />
           </SimpleGrid>
           <input name="categoryId" type="hidden" value={effectiveCategoryId} />
           <TextInput
-            label="Note"
+            label={common('note')}
             name="note"
-            placeholder="Coffee, invoice, rent"
+            placeholder={transactions('notePlaceholder')}
           />
           <FormButtons
             cancelHref="/transactions"

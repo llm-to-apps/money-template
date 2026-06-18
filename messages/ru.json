@@ -1,0 +1,122 @@
+{
+  "LocaleSwitcher": {
+    "label": "Язык",
+    "en": "English",
+    "de": "Deutsch",
+    "ru": "Русский"
+  },
+  "App": {
+    "name": "Деньги",
+    "description": "Личный учет денег."
+  },
+  "Shell": {
+    "openNavigation": "Открыть навигацию",
+    "footer": "Учет доходов, расходов и месячного денежного потока."
+  },
+  "Navigation": {
+    "dashboard": "Дашборд",
+    "transactions": "Транзакции",
+    "wallets": "Кошельки",
+    "categories": "Категории"
+  },
+  "Common": {
+    "add": "Добавить",
+    "amount": "Сумма",
+    "archived": "В архиве",
+    "balance": "Баланс",
+    "cancel": "Отмена",
+    "category": "Категория",
+    "color": "Цвет",
+    "comment": "Комментарий",
+    "currency": "Валюта",
+    "date": "Дата",
+    "edit": "Редактировать",
+    "expense": "Расход",
+    "expenses": "Расходы",
+    "home": "Главная",
+    "income": "Доход",
+    "localUser": "Локально",
+    "money": "Деньги",
+    "name": "Название",
+    "noComment": "Без комментария",
+    "noNote": "Без заметки",
+    "note": "Заметка",
+    "ok": "OK",
+    "save": "Сохранить",
+    "scope": "Область",
+    "type": "Тип",
+    "wallet": "Кошелек"
+  },
+  "Dashboard": {
+    "balance": "Баланс",
+    "categorySpend": "Расходы по категориям",
+    "monthExpenses": "Расходы за месяц",
+    "monthlyDynamics": "Динамика по месяцам",
+    "net": "Итого {amount}",
+    "noExpensesThisMonth": "В этом месяце расходов нет.",
+    "noTransactionsYet": "Транзакций пока нет.",
+    "previous": "Предыдущий период {amount}",
+    "recentTransactions": "Последние транзакции",
+    "thisMonth": "Этот месяц",
+    "wallets": "Кошельки"
+  },
+  "Transactions": {
+    "actions": "Действия с транзакцией",
+    "add": "Добавить транзакцию",
+    "delete": "Удалить транзакцию",
+    "empty": "Транзакций пока нет.",
+    "loadingMore": "Загрузка еще...",
+    "notFound": "Транзакция не найдена.",
+    "notePlaceholder": "Кофе, счет, аренда",
+    "shown": "Показано транзакций: {count}",
+    "subcategoriesEmpty": "Нет подкатегорий",
+    "subcategory": "Подкатегория"
+  },
+  "Wallets": {
+    "actions": "Действия с кошельком",
+    "add": "Добавить кошелек",
+    "commentPlaceholder": "Карта, наличные, банковский счет",
+    "delete": "Удалить кошелек",
+    "empty": "Кошельков пока нет.",
+    "initialBalance": "Начальный баланс",
+    "namePlaceholder": "Название кошелька",
+    "notFound": "Кошелек не найден."
+  },
+  "Categories": {
+    "actions": "Действия с категорией",
+    "add": "Добавить категорию",
+    "delete": "Удалить категорию",
+    "empty": "Категорий пока нет.",
+    "namePlaceholder": "Название категории или подкатегории",
+    "noParent": "Без родительской категории",
+    "notFound": "Категория не найдена.",
+    "parent": "Родитель"
+  },
+  "Forms": {
+    "archivedDescription": "Скрыть закрытый элемент, не удаляя его историю."
+  },
+  "Errors": {
+    "actionFailed": "Действие не выполнено",
+    "couldNotLoadMoney": "Не удалось загрузить Деньги",
+    "moneyCouldNotLoad": "Деньги не удалось загрузить",
+    "tryAgain": "Попробовать снова",
+    "unexpected": "Неожиданная ошибка приложения."
+  },
+  "Loading": {
+    "opening": "Открываем Деньги..."
+  },
+  "NotFound": {
+    "title": "Не найдено",
+    "description": "Такой страницы Денег не существует.",
+    "goHome": "На главную"
+  },
+  "Auth": {
+    "signedOutTitle": "Вы вышли из Денег",
+    "localDescription": "Продолжите с локальным пользователем для разработки, чтобы вернуться в Деньги.",
+    "os7Description": "Продолжите с аккаунтом OS7, чтобы вернуться в Деньги.",
+    "continueAsLocal": "Продолжить локально",
+    "continueAsLocalAria": "Продолжить как локальный пользователь",
+    "continueWithOs7": "Продолжить с OS7",
+    "signOut": "Выйти"
+  }
+}

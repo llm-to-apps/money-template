@@ -14,6 +14,7 @@ import {
   Switch
 } from '@mantine/core';
 import { MoreHorizontal, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import type { RecordStatus } from '@/shared/money-types';
 
@@ -22,14 +23,16 @@ export function TypeSelect({
 }: {
   defaultValue?: string;
 }) {
+  const common = useTranslations('Common');
+
   return (
     <Select
-      label="Type"
+      label={common('type')}
       hiddenInputProps={{ name: 'type' }}
       defaultValue={defaultValue}
       data={[
-        { value: 'EXPENSE', label: 'Expense' },
-        { value: 'INCOME', label: 'Income' }
+        { value: 'EXPENSE', label: common('expense') },
+        { value: 'INCOME', label: common('income') }
       ]}
       required
     />
@@ -67,13 +70,15 @@ export function FormButtons({
   isSaving?: boolean;
   saveDisabled?: boolean;
 }) {
+  const common = useTranslations('Common');
+
   return (
     <Group mt="sm">
       <Button type="submit" loading={isSaving} disabled={saveDisabled}>
-        Save
+        {common('save')}
       </Button>
       <Button component={Link} href={cancelHref} variant="default">
-        Cancel
+        {common('cancel')}
       </Button>
     </Group>
   );
@@ -116,6 +121,9 @@ export function DeleteMenu({
 }
 
 export function StatusSwitch({ status }: { status: RecordStatus }) {
+  const common = useTranslations('Common');
+  const forms = useTranslations('Forms');
+
   return (
     <Box>
       <input name="status" type="hidden" value="ACTIVE" />
@@ -123,8 +131,8 @@ export function StatusSwitch({ status }: { status: RecordStatus }) {
         name="status"
         value="ARCHIVED"
         defaultChecked={status === 'ARCHIVED'}
-        label="Archived"
-        description="Hide a closed item without deleting its history."
+        label={common('archived')}
+        description={forms('archivedDescription')}
       />
     </Box>
   );

@@ -1,0 +1,122 @@
+{
+  "LocaleSwitcher": {
+    "label": "Language",
+    "en": "English",
+    "de": "Deutsch",
+    "ru": "Русский"
+  },
+  "App": {
+    "name": "Money",
+    "description": "Personal money tracker."
+  },
+  "Shell": {
+    "openNavigation": "Open navigation",
+    "footer": "Track income, expenses, and monthly cash flow."
+  },
+  "Navigation": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "wallets": "Wallets",
+    "categories": "Categories"
+  },
+  "Common": {
+    "add": "Add",
+    "amount": "Amount",
+    "archived": "Archived",
+    "balance": "Balance",
+    "cancel": "Cancel",
+    "category": "Category",
+    "color": "Color",
+    "comment": "Comment",
+    "currency": "Currency",
+    "date": "Date",
+    "edit": "Edit",
+    "expense": "Expense",
+    "expenses": "Expenses",
+    "home": "Home",
+    "income": "Income",
+    "localUser": "Local",
+    "money": "Money",
+    "name": "Name",
+    "noComment": "No comment",
+    "noNote": "No note",
+    "note": "Note",
+    "ok": "OK",
+    "save": "Save",
+    "scope": "Scope",
+    "type": "Type",
+    "wallet": "Wallet"
+  },
+  "Dashboard": {
+    "balance": "Balance",
+    "categorySpend": "Category spend",
+    "monthExpenses": "Month expenses",
+    "monthlyDynamics": "Monthly dynamics",
+    "net": "Net {amount}",
+    "noExpensesThisMonth": "No expenses this month.",
+    "noTransactionsYet": "No transactions yet.",
+    "previous": "Previous {amount}",
+    "recentTransactions": "Recent transactions",
+    "thisMonth": "This month",
+    "wallets": "Wallets"
+  },
+  "Transactions": {
+    "actions": "Transaction actions",
+    "add": "Add transaction",
+    "delete": "Delete transaction",
+    "empty": "No transactions yet.",
+    "loadingMore": "Loading more...",
+    "notFound": "Transaction not found.",
+    "notePlaceholder": "Coffee, invoice, rent",
+    "shown": "Showing {count} transactions",
+    "subcategoriesEmpty": "No subcategories",
+    "subcategory": "Subcategory"
+  },
+  "Wallets": {
+    "actions": "Wallet actions",
+    "add": "Add wallet",
+    "commentPlaceholder": "Card, cash, bank account",
+    "delete": "Delete wallet",
+    "empty": "No wallets yet.",
+    "initialBalance": "Initial balance",
+    "namePlaceholder": "Wallet name",
+    "notFound": "Wallet not found."
+  },
+  "Categories": {
+    "actions": "Category actions",
+    "add": "Add category",
+    "delete": "Delete category",
+    "empty": "No categories yet.",
+    "namePlaceholder": "Category or subcategory name",
+    "noParent": "No parent",
+    "notFound": "Category not found.",
+    "parent": "Parent"
+  },
+  "Forms": {
+    "archivedDescription": "Hide a closed item without deleting its history."
+  },
+  "Errors": {
+    "actionFailed": "Action failed",
+    "couldNotLoadMoney": "Could not load Money",
+    "moneyCouldNotLoad": "Money could not load",
+    "tryAgain": "Try again",
+    "unexpected": "Unexpected application error."
+  },
+  "Loading": {
+    "opening": "Opening Money..."
+  },
+  "NotFound": {
+    "title": "Not found",
+    "description": "This Money page does not exist.",
+    "goHome": "Go home"
+  },
+  "Auth": {
+    "signedOutTitle": "You are signed out of Money",
+    "localDescription": "Continue with the local development user to return to Money.",
+    "os7Description": "Continue with your OS7 account to return to Money.",
+    "continueAsLocal": "Continue as Local",
+    "continueAsLocalAria": "Continue as local",
+    "continueWithOs7": "Continue with OS7",
+    "signOut": "Sign out"
+  }
+}

@@ -13,6 +13,7 @@ import {
 } from '@mantine/core';
 import { DataTable } from 'mantine-datatable';
 import { FormEvent } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 
 import {
   DeleteMenu,
@@ -33,29 +34,32 @@ type MutationFormHandler = (event: FormEvent<HTMLFormElement>) => void;
 
 export function WalletsList({ snapshot }: { snapshot: MoneySnapshot }) {
   const router = useRouter();
+  const locale = useLocale();
+  const common = useTranslations('Common');
+  const wallets = useTranslations('Wallets');
 
   return (
-    <TablePanel actionHref="/wallets/new" actionLabel="Add wallet">
+    <TablePanel actionHref="/wallets/new" actionLabel={wallets('add')}>
       <DataTable<WalletRecord>
         borderRadius="md"
         highlightOnHover
         idAccessor="id"
         minHeight={snapshot.wallets.length === 0 ? 140 : undefined}
-        noRecordsText="No wallets yet."
+        noRecordsText={wallets('empty')}
         onRowClick={({ record }) => router.push(`/wallets/${record.id}/edit`)}
         records={snapshot.wallets}
         withTableBorder
         columns={[
           {
             accessor: 'name',
-            title: 'Name',
+            title: common('name'),
             render: (wallet) => (
               <Group gap="xs">
                 <ColorDot color={wallet.color} />
                 <Text fw={600}>{wallet.name}</Text>
                 {wallet.status === 'ARCHIVED' ? (
                   <Badge variant="light" color="gray">
-                    Archived
+                    {common('archived')}
                   </Badge>
                 ) : null}
               </Group>
@@ -63,24 +67,24 @@ export function WalletsList({ snapshot }: { snapshot: MoneySnapshot }) {
           },
           {
             accessor: 'comment',
-            title: 'Comment',
+            title: common('comment'),
             visibleMediaQuery: desktopTableColumnQuery,
             render: (wallet) => (
-              <Text c="dimmed">{wallet.comment || 'No comment'}</Text>
+              <Text c="dimmed">{wallet.comment || common('noComment')}</Text>
             )
           },
           {
             accessor: 'currency',
-            title: 'Currency',
+            title: common('currency'),
             visibleMediaQuery: desktopTableColumnQuery
           },
           {
             accessor: 'balanceCents',
             noWrap: true,
-            title: 'Balance',
+            title: common('balance'),
             textAlign: 'right',
             render: (wallet) => (
-              <Text fw={700}>{formatMoney(wallet.balanceCents)}</Text>
+              <Text fw={700}>{formatMoney(wallet.balanceCents, locale)}</Text>
             )
           }
         ]}
@@ -100,14 +104,17 @@ export function WalletForm({
   onSubmit: MutationFormHandler;
   wallet?: WalletRecord;
 }) {
+  const common = useTranslations('Common');
+  const wallets = useTranslations('Wallets');
+
   return (
     <FormCard
       isBusy={isManaging}
       actions={
         wallet && onDeleteWallet ? (
           <DeleteMenu
-            label="Wallet actions"
-            itemLabel="Delete wallet"
+            label={wallets('actions')}
+            itemLabel={wallets('delete')}
             disabled={isManaging}
             onDelete={() => onDeleteWallet(wallet.id)}
           />
@@ -118,32 +125,32 @@ export function WalletForm({
         <Stack>
           <SimpleGrid cols={{ base: 1, sm: 2 }}>
             <TextInput
-              label="Name"
+              label={common('name')}
               name="name"
               defaultValue={wallet?.name ?? ''}
-              placeholder="Wallet name"
+              placeholder={wallets('namePlaceholder')}
               required
             />
             <TextInput
-              label="Comment"
+              label={common('comment')}
               name="comment"
               defaultValue={wallet?.comment ?? ''}
-              placeholder="Card, cash, bank account"
+              placeholder={wallets('commentPlaceholder')}
             />
             <TextInput
-              label="Currency"
+              label={common('currency')}
               name="currency"
               defaultValue={wallet?.currency ?? 'USD'}
               required
             />
             <ColorInput
-              label="Color"
+              label={common('color')}
               name="color"
               defaultValue={wallet?.color ?? '#059669'}
               swatches={colorSwatches}
             />
             <NumberInput
-              label="Initial balance"
+              label={wallets('initialBalance')}
               name="initialBalance"
               defaultValue={wallet ? wallet.initialBalanceCents / 100 : 0}
               step={0.01}

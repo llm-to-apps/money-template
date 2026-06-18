@@ -113,5 +113,6 @@ export type MoneyUser = {
 
 export type MoneyDashboardProps = {
   initialIsEmbedded: boolean;
+  initialLocaleLocked: boolean;
   initialUser: MoneyUser;
 };

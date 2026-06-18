@@ -2,6 +2,7 @@
 
 import { Avatar, Button, Menu } from '@mantine/core';
 import { ChevronDown, LogOut } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export function UserMenu({
   displayName,
@@ -10,6 +11,7 @@ export function UserMenu({
   displayName: string;
   isEmbedded: boolean;
 }) {
+  const auth = useTranslations('Auth');
   const initials =
     displayName
       .trim()
@@ -59,7 +61,7 @@ export function UserMenu({
               color="red"
               leftSection={<LogOut size={16} />}
             >
-              Sign out
+              {auth('signOut')}
             </Menu.Item>
           </form>
         </Menu.Dropdown>

@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { Card } from '@mantine/core';
+import { useTranslations } from 'next-intl';
 
 import { FormSkeleton } from '@/features/money/components/loading-skeletons';
 import {
@@ -37,14 +38,17 @@ export function WalletsRouteView({
   routeMode: MoneyRouteMode;
   snapshot: MoneySnapshot;
 }) {
+  const common = useTranslations('Common');
+  const navigation = useTranslations('Navigation');
+
   if (routeMode.action === 'new') {
     return (
       <ViewStack>
         <MoneyBreadcrumbs
           items={[
             homeCrumb,
-            { href: '/wallets', label: 'Wallets' },
-            { label: 'Add' }
+            { href: '/wallets', label: navigation('wallets') },
+            { label: common('add') }
           ]}
         />
         <WalletForm isManaging={isManaging} onSubmit={onCreateWallet} />
@@ -68,7 +72,7 @@ export function WalletsRouteView({
 
   return (
     <ViewStack>
-      <MoneyBreadcrumbs items={[homeCrumb, { label: 'Wallets' }]} />
+      <MoneyBreadcrumbs items={[homeCrumb, { label: navigation('wallets') }]} />
       <WalletsList snapshot={snapshot} />
     </ViewStack>
   );
@@ -87,6 +91,9 @@ function WalletEditView({
   onUpdateWallet: (event: FormEvent<HTMLFormElement>, walletId: string) => void;
   walletId: string;
 }) {
+  const common = useTranslations('Common');
+  const navigation = useTranslations('Navigation');
+  const walletsText = useTranslations('Wallets');
   const [wallet, setWallet] = useState<WalletRecord | null>(
     initialWallet ?? null
   );
@@ -145,8 +152,8 @@ function WalletEditView({
       <MoneyBreadcrumbs
         items={[
           homeCrumb,
-          { href: '/wallets', label: 'Wallets' },
-          { label: wallet?.name ?? 'Edit' }
+          { href: '/wallets', label: navigation('wallets') },
+          { label: wallet?.name ?? common('edit') }
         ]}
       />
       {wallet ? (
@@ -157,7 +164,7 @@ function WalletEditView({
           wallet={wallet}
         />
       ) : status === 'error' ? (
-        <Card withBorder>Wallet not found.</Card>
+        <Card withBorder>{walletsText('notFound')}</Card>
       ) : (
         <FormSkeleton />
       )}

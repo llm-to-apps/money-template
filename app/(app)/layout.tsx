@@ -2,13 +2,16 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { ReactNode } from 'react';
 
+import { localeSearchParamHeaderName } from '@/i18n/locales';
 import { getCurrentUser, isManuallyLoggedOut } from '@/server/auth';
 import { MoneyDashboard } from '@/features/money/dashboard/money-dashboard';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const isEmbedded = isFrameRequest(await headers());
+  const headerStore = await headers();
+  const isEmbedded = isFrameRequest(headerStore);
+  const localeLocked = headerStore.get(localeSearchParamHeaderName) === '1';
   const [user, manuallyLoggedOut] = await Promise.all([
     getCurrentUser(),
     isManuallyLoggedOut()
@@ -26,6 +29,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <>
       <MoneyDashboard
         initialIsEmbedded={isEmbedded}
+        initialLocaleLocked={localeLocked}
         initialUser={{
           displayName: user.name
         }}

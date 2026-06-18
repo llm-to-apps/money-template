@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { Alert, Center } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useTranslations } from 'next-intl';
 
 import { MoneyDashboardShell } from '@/features/money/dashboard/money-dashboard-shell';
 import { useMoneyMutations } from '@/features/money/dashboard/use-money-mutations';
@@ -17,10 +18,13 @@ import { routeModeFromPathname, viewFromPathname } from '@/shared/money-utils';
 
 export function MoneyDashboard({
   initialIsEmbedded,
+  initialLocaleLocked,
   initialUser
 }: MoneyDashboardProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const common = useTranslations('Common');
+  const errors = useTranslations('Errors');
   const [mobileNavOpened, mobileNav] = useDisclosure(false);
   const currentView = viewFromPathname(pathname);
   const routeMode = routeModeFromPathname(pathname);
@@ -45,7 +49,7 @@ export function MoneyDashboard({
   if (error && !snapshot) {
     return (
       <Center mih="100vh">
-        <Alert color="red" title="Could not load Money">
+        <Alert color="red" title={errors('couldNotLoadMoney')}>
           {error}
         </Alert>
       </Center>
@@ -56,8 +60,9 @@ export function MoneyDashboard({
     return (
       <MoneyDashboardShell
         currentView={currentView}
-        displayName={user.displayName ?? 'Local'}
+        displayName={user.displayName ?? common('localUser')}
         isEmbedded={initialIsEmbedded}
+        isLocaleLocked={initialLocaleLocked}
         mobileNavOpened={mobileNavOpened}
         onCloseMobileNav={mobileNav.close}
         onToggleMobileNav={mobileNav.toggle}
@@ -70,8 +75,9 @@ export function MoneyDashboard({
   return (
     <MoneyDashboardShell
       currentView={currentView}
-      displayName={user.displayName ?? 'Local'}
+      displayName={user.displayName ?? common('localUser')}
       isEmbedded={initialIsEmbedded}
+      isLocaleLocked={initialLocaleLocked}
       mobileNavOpened={mobileNavOpened}
       onCloseMobileNav={mobileNav.close}
       onToggleMobileNav={mobileNav.toggle}

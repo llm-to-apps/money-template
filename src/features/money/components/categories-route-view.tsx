@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { Card } from '@mantine/core';
+import { useTranslations } from 'next-intl';
 
 import { FormSkeleton } from '@/features/money/components/loading-skeletons';
 import {
@@ -40,14 +41,17 @@ export function CategoriesRouteView({
   routeMode: MoneyRouteMode;
   snapshot: MoneySnapshot;
 }) {
+  const common = useTranslations('Common');
+  const navigation = useTranslations('Navigation');
+
   if (routeMode.action === 'new') {
     return (
       <ViewStack>
         <MoneyBreadcrumbs
           items={[
             homeCrumb,
-            { href: '/categories', label: 'Categories' },
-            { label: 'Add' }
+            { href: '/categories', label: navigation('categories') },
+            { label: common('add') }
           ]}
         />
         <CategoryForm
@@ -76,7 +80,9 @@ export function CategoriesRouteView({
 
   return (
     <ViewStack>
-      <MoneyBreadcrumbs items={[homeCrumb, { label: 'Categories' }]} />
+      <MoneyBreadcrumbs
+        items={[homeCrumb, { label: navigation('categories') }]}
+      />
       <CategoriesList snapshot={snapshot} />
     </ViewStack>
   );
@@ -100,6 +106,9 @@ function CategoryEditView({
     categoryId: string
   ) => void;
 }) {
+  const common = useTranslations('Common');
+  const navigation = useTranslations('Navigation');
+  const categoriesText = useTranslations('Categories');
   const [category, setCategory] = useState<CategoryRecord | null>(
     initialCategory ?? null
   );
@@ -158,8 +167,8 @@ function CategoryEditView({
       <MoneyBreadcrumbs
         items={[
           homeCrumb,
-          { href: '/categories', label: 'Categories' },
-          { label: category?.label ?? 'Edit' }
+          { href: '/categories', label: navigation('categories') },
+          { label: category?.label ?? common('edit') }
         ]}
       />
       {category ? (
@@ -171,7 +180,7 @@ function CategoryEditView({
           onSubmit={(event) => onUpdateCategory(event, category.id)}
         />
       ) : status === 'error' ? (
-        <Card withBorder>Category not found.</Card>
+        <Card withBorder>{categoriesText('notFound')}</Card>
       ) : (
         <FormSkeleton />
       )}

@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { Card } from '@mantine/core';
+import { useTranslations } from 'next-intl';
 
 import { FormSkeleton } from '@/features/money/components/loading-skeletons';
 import {
@@ -50,14 +51,17 @@ export function TransactionsRouteView({
   routeMode: MoneyRouteMode;
   snapshot: MoneySnapshot;
 }) {
+  const common = useTranslations('Common');
+  const navigation = useTranslations('Navigation');
+
   if (routeMode.action === 'new') {
     return (
       <ViewStack>
         <MoneyBreadcrumbs
           items={[
             homeCrumb,
-            { href: '/transactions', label: 'Transactions' },
-            { label: 'Add' }
+            { href: '/transactions', label: navigation('transactions') },
+            { label: common('add') }
           ]}
         />
         <AddTransactionForm
@@ -93,7 +97,9 @@ export function TransactionsRouteView({
 
   return (
     <ViewStack>
-      <MoneyBreadcrumbs items={[homeCrumb, { label: 'Transactions' }]} />
+      <MoneyBreadcrumbs
+        items={[homeCrumb, { label: navigation('transactions') }]}
+      />
       <TransactionsList snapshot={snapshot} />
     </ViewStack>
   );
@@ -119,6 +125,9 @@ function TransactionEditView({
   transactionId: string;
   wallets: MoneySnapshot['wallets'];
 }) {
+  const common = useTranslations('Common');
+  const navigation = useTranslations('Navigation');
+  const transactionsText = useTranslations('Transactions');
   const [transaction, setTransaction] = useState<TransactionRecord | null>(
     initialTransaction ?? null
   );
@@ -177,8 +186,8 @@ function TransactionEditView({
       <MoneyBreadcrumbs
         items={[
           homeCrumb,
-          { href: '/transactions', label: 'Transactions' },
-          { label: transaction?.category.label ?? 'Edit' }
+          { href: '/transactions', label: navigation('transactions') },
+          { label: transaction?.category.label ?? common('edit') }
         ]}
       />
       {transaction ? (
@@ -191,7 +200,7 @@ function TransactionEditView({
           wallets={wallets}
         />
       ) : status === 'error' ? (
-        <Card withBorder>Transaction not found.</Card>
+        <Card withBorder>{transactionsText('notFound')}</Card>
       ) : (
         <FormSkeleton />
       )}

@@ -8,12 +8,14 @@ import {
   Title
 } from '@mantine/core';
 import { Wallet } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 import { Os7Logo } from '@os7/ui-kit/os7-brand';
 
 import { isLocalAuthMode } from '@/server/env';
 
-export default function SignedOutPage() {
+export default async function SignedOutPage() {
+  const auth = await getTranslations('Auth');
   const isLocalAuth = isLocalAuthMode();
 
   return (
@@ -24,21 +26,23 @@ export default function SignedOutPage() {
             <Wallet size={22} />
           </ThemeIcon>
           <Title order={1} size="h3">
-            You are signed out of Money
+            {auth('signedOutTitle')}
           </Title>
           <Text c="dimmed">
             {isLocalAuth
-              ? 'Continue with the local development user to return to Money.'
-              : 'Continue with your OS7 account to return to Money.'}
+              ? auth('localDescription')
+              : auth('os7Description')}
           </Text>
           <Button
             component="a"
             href="/api/auth/login?interactive=1"
-            aria-label={isLocalAuth ? 'Continue as local' : 'Continue with OS7'}
+            aria-label={
+              isLocalAuth ? auth('continueAsLocalAria') : auth('continueWithOs7')
+            }
             color="dark"
             variant="default"
           >
-            {isLocalAuth ? 'Continue as Local' : <Os7Logo w={62} />}
+            {isLocalAuth ? auth('continueAsLocal') : <Os7Logo w={62} />}
           </Button>
         </Stack>
       </Paper>

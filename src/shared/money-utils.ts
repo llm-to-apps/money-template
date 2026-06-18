@@ -12,15 +12,15 @@ export function waitForUiDelay() {
   });
 }
 
-export function formatMoney(cents: number) {
-  return new Intl.NumberFormat('en-US', {
+export function formatMoney(cents: number, locale = 'en', currency = 'USD') {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: 'USD'
+    currency
   }).format(cents / 100);
 }
 
-export function formatDate(value: Date | string) {
-  return new Date(value).toLocaleDateString('en-US');
+export function formatDate(value: Date | string, locale = 'en') {
+  return new Date(value).toLocaleDateString(locale);
 }
 
 export function formatDateInputValue(value: Date | string) {

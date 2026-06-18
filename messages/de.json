@@ -1,0 +1,122 @@
+{
+  "LocaleSwitcher": {
+    "label": "Sprache",
+    "en": "English",
+    "de": "Deutsch",
+    "ru": "Русский"
+  },
+  "App": {
+    "name": "Geld",
+    "description": "Persönlicher Geld-Tracker."
+  },
+  "Shell": {
+    "openNavigation": "Navigation öffnen",
+    "footer": "Einnahmen, Ausgaben und monatlichen Cashflow verfolgen."
+  },
+  "Navigation": {
+    "dashboard": "Dashboard",
+    "transactions": "Transaktionen",
+    "wallets": "Wallets",
+    "categories": "Kategorien"
+  },
+  "Common": {
+    "add": "Hinzufügen",
+    "amount": "Betrag",
+    "archived": "Archiviert",
+    "balance": "Saldo",
+    "cancel": "Abbrechen",
+    "category": "Kategorie",
+    "color": "Farbe",
+    "comment": "Kommentar",
+    "currency": "Währung",
+    "date": "Datum",
+    "edit": "Bearbeiten",
+    "expense": "Ausgabe",
+    "expenses": "Ausgaben",
+    "home": "Start",
+    "income": "Einnahme",
+    "localUser": "Lokal",
+    "money": "Geld",
+    "name": "Name",
+    "noComment": "Kein Kommentar",
+    "noNote": "Keine Notiz",
+    "note": "Notiz",
+    "ok": "OK",
+    "save": "Speichern",
+    "scope": "Geltungsbereich",
+    "type": "Typ",
+    "wallet": "Wallet"
+  },
+  "Dashboard": {
+    "balance": "Saldo",
+    "categorySpend": "Ausgaben nach Kategorie",
+    "monthExpenses": "Monatsausgaben",
+    "monthlyDynamics": "Monatliche Entwicklung",
+    "net": "Netto {amount}",
+    "noExpensesThisMonth": "Keine Ausgaben in diesem Monat.",
+    "noTransactionsYet": "Noch keine Transaktionen.",
+    "previous": "Vorheriger Wert {amount}",
+    "recentTransactions": "Letzte Transaktionen",
+    "thisMonth": "Dieser Monat",
+    "wallets": "Wallets"
+  },
+  "Transactions": {
+    "actions": "Transaktionsaktionen",
+    "add": "Transaktion hinzufügen",
+    "delete": "Transaktion löschen",
+    "empty": "Noch keine Transaktionen.",
+    "loadingMore": "Weitere werden geladen...",
+    "notFound": "Transaktion nicht gefunden.",
+    "notePlaceholder": "Kaffee, Rechnung, Miete",
+    "shown": "{count} Transaktionen angezeigt",
+    "subcategoriesEmpty": "Keine Unterkategorien",
+    "subcategory": "Unterkategorie"
+  },
+  "Wallets": {
+    "actions": "Wallet-Aktionen",
+    "add": "Wallet hinzufügen",
+    "commentPlaceholder": "Karte, Bargeld, Bankkonto",
+    "delete": "Wallet löschen",
+    "empty": "Noch keine Wallets.",
+    "initialBalance": "Anfangssaldo",
+    "namePlaceholder": "Wallet-Name",
+    "notFound": "Wallet nicht gefunden."
+  },
+  "Categories": {
+    "actions": "Kategorieaktionen",
+    "add": "Kategorie hinzufügen",
+    "delete": "Kategorie löschen",
+    "empty": "Noch keine Kategorien.",
+    "namePlaceholder": "Kategorie- oder Unterkategoriename",
+    "noParent": "Keine übergeordnete Kategorie",
+    "notFound": "Kategorie nicht gefunden.",
+    "parent": "Übergeordnet"
+  },
+  "Forms": {
+    "archivedDescription": "Geschlossenen Eintrag ausblenden, ohne seine Historie zu löschen."
+  },
+  "Errors": {
+    "actionFailed": "Aktion fehlgeschlagen",
+    "couldNotLoadMoney": "Geld konnte nicht geladen werden",
+    "moneyCouldNotLoad": "Geld konnte nicht geladen werden",
+    "tryAgain": "Erneut versuchen",
+    "unexpected": "Unerwarteter Anwendungsfehler."
+  },
+  "Loading": {
+    "opening": "Geld wird geöffnet..."
+  },
+  "NotFound": {
+    "title": "Nicht gefunden",
+    "description": "Diese Geld-Seite existiert nicht.",
+    "goHome": "Zur Startseite"
+  },
+  "Auth": {
+    "signedOutTitle": "Du bist von Geld abgemeldet",
+    "localDescription": "Fahre mit dem lokalen Entwicklungsbenutzer fort, um zu Geld zurückzukehren.",
+    "os7Description": "Fahre mit deinem OS7-Konto fort, um zu Geld zurückzukehren.",
+    "continueAsLocal": "Als Lokal fortfahren",
+    "continueAsLocalAria": "Als lokaler Benutzer fortfahren",
+    "continueWithOs7": "Mit OS7 fortfahren",
+    "signOut": "Abmelden"
+  }
+}

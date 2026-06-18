@@ -13,6 +13,7 @@ import {
 } from '@mantine/core';
 import { DataTable } from 'mantine-datatable';
 import { FormEvent } from 'react';
+import { useTranslations } from 'next-intl';
 
 import {
   DeleteMenu,
@@ -33,15 +34,17 @@ type MutationFormHandler = (event: FormEvent<HTMLFormElement>) => void;
 
 export function CategoriesList({ snapshot }: { snapshot: MoneySnapshot }) {
   const router = useRouter();
+  const common = useTranslations('Common');
+  const categories = useTranslations('Categories');
 
   return (
-    <TablePanel actionHref="/categories/new" actionLabel="Add category">
+    <TablePanel actionHref="/categories/new" actionLabel={categories('add')}>
       <DataTable<CategoryRecord>
         borderRadius="md"
         highlightOnHover
         idAccessor="id"
         minHeight={snapshot.categories.length === 0 ? 140 : undefined}
-        noRecordsText="No categories yet."
+        noRecordsText={categories('empty')}
         onRowClick={({ record }) =>
           router.push(`/categories/${record.id}/edit`)
         }
@@ -50,14 +53,14 @@ export function CategoriesList({ snapshot }: { snapshot: MoneySnapshot }) {
         columns={[
           {
             accessor: 'name',
-            title: 'Name',
+            title: common('name'),
             render: (category) => (
               <Group gap="xs">
                 <ColorDot color={category.color} />
                 <Text fw={600}>{category.label}</Text>
                 {category.status === 'ARCHIVED' ? (
                   <Badge variant="light" color="gray">
-                    Archived
+                    {common('archived')}
                   </Badge>
                 ) : null}
               </Group>
@@ -65,7 +68,7 @@ export function CategoriesList({ snapshot }: { snapshot: MoneySnapshot }) {
           },
           {
             accessor: 'parent.name',
-            title: 'Parent',
+            title: categories('parent'),
             visibleMediaQuery: desktopTableColumnQuery,
             render: (category) => (
               <Text c="dimmed">{category.parent?.name ?? '-'}</Text>
@@ -73,7 +76,7 @@ export function CategoriesList({ snapshot }: { snapshot: MoneySnapshot }) {
           },
           {
             accessor: 'scope',
-            title: 'Scope',
+            title: common('scope'),
             render: (category) => category.scope.toLowerCase()
           }
         ]}
@@ -95,6 +98,8 @@ export function CategoryForm({
   onDeleteCategory?: (categoryId: string) => void;
   onSubmit: MutationFormHandler;
 }) {
+  const common = useTranslations('Common');
+  const categoriesText = useTranslations('Categories');
   const parents = categories.filter(
     (item) =>
       !item.parentId && item.status === 'ACTIVE' && item.id !== category?.id
@@ -106,8 +111,8 @@ export function CategoryForm({
       actions={
         category && onDeleteCategory ? (
           <DeleteMenu
-            label="Category actions"
-            itemLabel="Delete category"
+            label={categoriesText('actions')}
+            itemLabel={categoriesText('delete')}
             disabled={isManaging}
             onDelete={() => onDeleteCategory(category.id)}
           />
@@ -118,18 +123,18 @@ export function CategoryForm({
         <Stack>
           <SimpleGrid cols={{ base: 1, sm: 2 }}>
             <TextInput
-              label="Name"
+              label={common('name')}
               name="name"
               defaultValue={category?.name ?? ''}
-              placeholder="Category or subcategory name"
+              placeholder={categoriesText('namePlaceholder')}
               required
             />
             <Select
-              label="Parent"
+              label={categoriesText('parent')}
               hiddenInputProps={{ name: 'parentId' }}
               defaultValue={category?.parentId ?? 'none'}
               data={[
-                { value: 'none', label: 'No parent' },
+                { value: 'none', label: categoriesText('noParent') },
                 ...parents.map((parent) => ({
                   value: parent.id,
                   label: parent.name
@@ -137,7 +142,7 @@ export function CategoryForm({
               ]}
             />
             <Select
-              label="Scope"
+              label={common('scope')}
               hiddenInputProps={{ name: 'scope' }}
               defaultValue={category?.scope ?? 'BOTH'}
               data={categoryScopes.map((scope) => ({
@@ -146,7 +151,7 @@ export function CategoryForm({
               }))}
             />
             <ColorInput
-              label="Color"
+              label={common('color')}
               name="color"
               defaultValue={category?.color ?? '#059669'}
               swatches={colorSwatches}

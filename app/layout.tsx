@@ -5,33 +5,43 @@ import '@mantine/notifications/styles.css';
 import 'mantine-datatable/styles.css';
 import type { Metadata } from 'next';
 import { ColorSchemeScript, mantineHtmlProps } from '@mantine/core';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 import { MoneyMantineProvider } from './mantine-provider';
 
-export const metadata: Metadata = {
-  title: 'Money',
-  description: 'Personal money tracker.',
-  icons: {
-    apple: '/apple-touch-icon.png',
-    icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon-512.png', sizes: '512x512', type: 'image/png' }
-    ]
-  }
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const app = await getTranslations('App');
 
-export default function RootLayout({
+  return {
+    title: app('name'),
+    description: app('description'),
+    icons: {
+      apple: '/apple-touch-icon.png',
+      icon: [
+        { url: '/favicon.svg', type: 'image/svg+xml' },
+        { url: '/favicon-512.png', sizes: '512x512', type: 'image/png' }
+      ]
+    }
+  };
+}
+
+export default async function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" {...mantineHtmlProps}>
+    <html lang={locale} {...mantineHtmlProps}>
       <head>
         <ColorSchemeScript />
       </head>
       <body>
-        <MoneyMantineProvider>{children}</MoneyMantineProvider>
+        <NextIntlClientProvider>
+          <MoneyMantineProvider>{children}</MoneyMantineProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
