@@ -26,7 +26,6 @@ export function UserMenu({
       position="bottom-end"
       shadow="md"
       transitionProps={{ transition: 'pop-top-right' }}
-      width={260}
       withinPortal
     >
       <Menu.Target>
@@ -53,7 +52,6 @@ export function UserMenu({
       </Menu.Target>
       {!isEmbedded ? (
         <Menu.Dropdown>
-          <Menu.Label>{displayName}</Menu.Label>
           <form action="/api/auth/logout" method="post">
             <Menu.Item
               component="button"

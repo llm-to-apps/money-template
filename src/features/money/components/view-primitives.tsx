@@ -2,19 +2,12 @@
 
 import Link from 'next/link';
 import { ReactNode } from 'react';
-import {
-  ActionIcon,
-  Breadcrumbs,
-  Button,
-  Card,
-  Group,
-  Stack,
-  Text,
-  ThemeIcon
-} from '@mantine/core';
+import { ActionIcon, Card, Group, Stack, ThemeIcon } from '@mantine/core';
 import type { MantineTheme } from '@mantine/core';
 import { ChevronRight, Home, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+
+import { Os7Breadcrumbs } from '@os7/ui-kit/os7-breadcrumbs';
 
 import type {
   CategoryRecord,
@@ -58,26 +51,15 @@ export function MoneyBreadcrumbs({
   const common = useTranslations('Common');
 
   return (
-    <Breadcrumbs separator={<ChevronRight size={14} />}>
-      {items.map((item, index) =>
-        item.href && index !== items.length - 1 ? (
-          <Button
-            key={`${item.label}-${index}`}
-            component={Link}
-            href={item.href}
-            variant="subtle"
-            size="compact-sm"
-            leftSection={item.href === '/' ? <Home size={15} /> : undefined}
-          >
-            {item.href === '/' ? common('home') : item.label}
-          </Button>
-        ) : (
-          <Text key={`${item.label}-${index}`} c="dimmed">
-            {item.label}
-          </Text>
-        )
-      )}
-    </Breadcrumbs>
+    <Os7Breadcrumbs
+      linkComponent={Link}
+      separator={<ChevronRight size={14} />}
+      items={items.map((item) => ({
+        href: item.href,
+        label: item.href === '/' ? common('home') : item.label,
+        leftSection: item.href === '/' ? <Home size={15} /> : undefined
+      }))}
+    />
   );
 }
 
