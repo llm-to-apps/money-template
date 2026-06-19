@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, Button, Menu } from '@mantine/core';
+import { Avatar, Group, Menu, Text, UnstyledButton } from '@mantine/core';
 import { ChevronDown, LogOut } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -30,26 +30,33 @@ export function UserMenu({
       withinPortal
     >
       <Menu.Target>
-        <Button
-          leftSection={
+        <UnstyledButton
+          aria-label={displayName}
+          style={{
+            borderRadius: 'var(--mantine-radius-md)',
+            color: 'var(--mantine-color-text)',
+            display: 'block',
+            maxWidth: 'min(184px, 36vw)',
+            padding: '6px 10px'
+          }}
+        >
+          <Group gap="xs" wrap="nowrap">
             <Avatar alt={displayName} radius="xl" size={20}>
               {initials}
             </Avatar>
-          }
-          rightSection={<ChevronDown size={12} />}
-          maw={{ base: 132, md: 184 }}
-          variant="subtle"
-        >
-          <span
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {displayName}
-          </span>
-        </Button>
+            <Text
+              component="span"
+              fw={500}
+              lh={1.35}
+              size="sm"
+              style={{ minWidth: 0 }}
+              truncate
+            >
+              {displayName}
+            </Text>
+            <ChevronDown size={12} style={{ flex: '0 0 auto' }} />
+          </Group>
+        </UnstyledButton>
       </Menu.Target>
       {!isEmbedded ? (
         <Menu.Dropdown>
