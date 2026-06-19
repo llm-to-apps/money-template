@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { ReactNode } from 'react';
 import {
   AppShell,
-  Badge,
   Box,
   Burger,
   Container,
+  Drawer,
   Group,
   NavLink,
   Stack,
@@ -45,7 +45,6 @@ export function MoneyDashboardShell({
 }: MoneyDashboardShellProps) {
   const navigation = useTranslations('Navigation');
   const shell = useTranslations('Shell');
-  const app = useTranslations('App');
 
   const moneyNavItems = getMoneyNavItems({
     categories: navigation('categories'),
@@ -57,11 +56,6 @@ export function MoneyDashboardShell({
   return (
     <AppShell
       header={{ height: 64 }}
-      navbar={{
-        width: 280,
-        breakpoint: 'sm',
-        collapsed: { desktop: true, mobile: !mobileNavOpened }
-      }}
       footer={{ height: 44, offset: false }}
       padding="md"
     >
@@ -76,7 +70,7 @@ export function MoneyDashboardShell({
               gridTemplateColumns: 'auto minmax(0, 1fr) auto'
             }}
           >
-            <Group gap="sm" h="100%" wrap="nowrap">
+            <Group gap="sm" wrap="nowrap">
               <Burger
                 opened={mobileNavOpened}
                 onClick={onToggleMobileNav}
@@ -84,19 +78,12 @@ export function MoneyDashboardShell({
                 size="sm"
                 aria-label={shell('openNavigation')}
               />
-              <Badge radius="md" size="lg" variant="outline">
-                {app('name')}
-              </Badge>
+              <Os7Logo href="/" w={48} />
             </Group>
 
-            <Box
-              h="100%"
-              visibleFrom="sm"
-              style={{ minWidth: 0, overflow: 'hidden' }}
-            >
+            <Box visibleFrom="sm" style={{ minWidth: 0, overflow: 'hidden' }}>
               <Group
                 gap={4}
-                h="100%"
                 justify="center"
                 wrap="nowrap"
                 style={{
@@ -121,7 +108,7 @@ export function MoneyDashboardShell({
               </Group>
             </Box>
 
-            <Group h="100%" justify="flex-end" wrap="nowrap">
+            <Group gap="sm" h="100%" justify="flex-end" wrap="nowrap">
               {!isLocaleLocked ? <LocaleSwitcher /> : null}
               <UserMenu displayName={displayName} isEmbedded={isEmbedded} />
             </Group>
@@ -129,7 +116,11 @@ export function MoneyDashboardShell({
         </Container>
       </AppShell.Header>
 
-      <AppShell.Navbar p="md">
+      <Drawer
+        opened={mobileNavOpened}
+        onClose={onCloseMobileNav}
+        title="Navigation"
+      >
         <Stack gap="sm">
           {moneyNavItems.map((item) => (
             <NavLink
@@ -143,7 +134,7 @@ export function MoneyDashboardShell({
             />
           ))}
         </Stack>
-      </AppShell.Navbar>
+      </Drawer>
 
       <AppShell.Main>
         <Container>{children}</Container>

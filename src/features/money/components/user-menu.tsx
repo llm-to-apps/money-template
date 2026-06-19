@@ -44,14 +44,7 @@ export function UserMenu({
             <Avatar alt={displayName} radius="xl" size={20}>
               {initials}
             </Avatar>
-            <Text
-              component="span"
-              fw={500}
-              lh={1.35}
-              size="sm"
-              style={{ minWidth: 0 }}
-              truncate
-            >
+            <Text component="span" fw={500} style={{ minWidth: 0 }} truncate>
               {displayName}
             </Text>
             <ChevronDown size={12} style={{ flex: '0 0 auto' }} />

@@ -3,6 +3,7 @@ import '@mantine/charts/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
 import 'mantine-datatable/styles.css';
+import './globals.css';
 import type { Metadata } from 'next';
 import { ColorSchemeScript, mantineHtmlProps } from '@mantine/core';
 import { NextIntlClientProvider } from 'next-intl';
