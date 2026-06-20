@@ -105,22 +105,7 @@ export async function handleOAuthCallback({
   logInfo('auth.oauth_state.verified', { provider: 'os7' });
   const accessToken = await exchangeCodeForAccessToken(code, origin);
   const userInfo = await fetchUserInfo(accessToken);
-  const user = await prisma.user.upsert({
-    where: {
-      id: userInfo.sub
-    },
-    update: {
-      email: userInfo.email,
-      name: userInfo.name ?? null,
-      role: userInfo.role
-    },
-    create: {
-      id: userInfo.sub,
-      email: userInfo.email,
-      name: userInfo.name ?? null,
-      role: userInfo.role
-    }
-  });
+  const user = await saveOAuthUser(userInfo);
 
   await createSession({
     id: user.id,
@@ -134,6 +119,66 @@ export async function handleOAuthCallback({
     provider: 'os7',
     userId: user.id
   });
+}
+
+async function saveOAuthUser(userInfo: OAuthUserInfo) {
+  const payload = {
+    email: userInfo.email,
+    name: userInfo.name ?? null,
+    role: userInfo.role
+  };
+
+  try {
+    return await prisma.user.upsert({
+      where: {
+        id: userInfo.sub
+      },
+      update: payload,
+      create: {
+        id: userInfo.sub,
+        ...payload
+      }
+    });
+  } catch (error) {
+    if (!isUniqueConstraintError(error)) {
+      throw error;
+    }
+
+    logWarn('auth.oauth_user.unique_collision', {
+      email: userInfo.email,
+      provider: 'os7',
+      userId: userInfo.sub
+    });
+
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ id: userInfo.sub }, { email: userInfo.email }]
+      },
+      select: {
+        id: true
+      }
+    });
+
+    if (!existingUser) {
+      throw error;
+    }
+
+    return prisma.user.update({
+      where: {
+        id: existingUser.id
+      },
+      data: payload
+    });
+  }
+}
+
+function isUniqueConstraintError(error: unknown) {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === 'P2002'
+  );
 }
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {

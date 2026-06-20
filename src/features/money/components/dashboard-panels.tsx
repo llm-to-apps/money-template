@@ -159,23 +159,25 @@ function CategorySpendPanel({ snapshot }: { snapshot: MoneySnapshot }) {
       {data.length === 0 ? (
         <Text c="dimmed">{dashboard('noExpensesThisMonth')}</Text>
       ) : (
-        <BarChart
-          h={Math.max(260, data.length * 44)}
-          data={data}
-          dataKey="category"
-          gridAxis="x"
-          orientation="vertical"
-          series={[
-            { name: 'amount', label: common('amount'), color: 'blue.6' }
-          ]}
-          tickLine="none"
-          valueFormatter={(value) => formatMoney(value, locale)}
-          withTooltip
-          xAxisProps={{
-            tickFormatter: (value) => formatMoney(Number(value), locale)
-          }}
-          yAxisProps={{ width: 128 }}
-        />
+        <ChartFrame height={Math.max(260, data.length * 44)}>
+          <BarChart
+            h="100%"
+            data={data}
+            dataKey="category"
+            gridAxis="x"
+            orientation="vertical"
+            series={[
+              { name: 'amount', label: common('amount'), color: 'blue.6' }
+            ]}
+            tickLine="none"
+            valueFormatter={(value) => formatMoney(value, locale)}
+            withTooltip
+            xAxisProps={{
+              tickFormatter: (value) => formatMoney(Number(value), locale)
+            }}
+            yAxisProps={{ width: 128 }}
+          />
+        </ChartFrame>
       )}
     </Card>
   );
@@ -196,20 +198,36 @@ function TrendPanel({ snapshot }: { snapshot: MoneySnapshot }) {
       <Title order={2} size="h4" mb="md">
         {dashboard('monthlyDynamics')}
       </Title>
-      <BarChart
-        h={260}
-        data={data}
-        dataKey="month"
-        series={[
-          { name: 'income', label: common('income'), color: 'green.6' },
-          { name: 'expenses', label: common('expenses'), color: 'red.6' }
-        ]}
-        valueFormatter={(value) => formatMoney(value, locale)}
-        tickLine="y"
-        gridAxis="y"
-        withLegend
-      />
+      <ChartFrame height={260}>
+        <BarChart
+          h="100%"
+          data={data}
+          dataKey="month"
+          series={[
+            { name: 'income', label: common('income'), color: 'green.6' },
+            { name: 'expenses', label: common('expenses'), color: 'red.6' }
+          ]}
+          valueFormatter={(value) => formatMoney(value, locale)}
+          tickLine="y"
+          gridAxis="y"
+          withLegend
+        />
+      </ChartFrame>
     </Card>
+  );
+}
+
+function ChartFrame({
+  children,
+  height
+}: {
+  children: React.ReactNode;
+  height: number;
+}) {
+  return (
+    <Box h={height} miw={0} w="100%" style={{ overflow: 'hidden' }}>
+      {children}
+    </Box>
   );
 }
 
