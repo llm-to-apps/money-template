@@ -26,6 +26,20 @@ describe('wallet schemas', () => {
     });
   });
 
+  it('normalizes wallet currency codes', () => {
+    expect(
+      parseCreateWalletInput({ name: 'Euro', currency: ' eur ' })
+    ).toMatchObject({
+      currency: 'EUR'
+    });
+    expect(
+      parseUpdateWalletInput({ id: 'wallet_1', currency: ' custom ' })
+    ).toMatchObject({
+      data: { currency: 'CUSTOM' },
+      id: 'wallet_1'
+    });
+  });
+
   it('requires at least one update field', () => {
     expect(() => parseUpdateWalletInput({ id: 'wallet_1' })).toThrow(
       'at least one wallet field is required'

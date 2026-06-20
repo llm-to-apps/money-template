@@ -132,7 +132,9 @@ function WalletsPanel({ snapshot }: { snapshot: MoneySnapshot }) {
                 </Text>
               </Box>
             </Group>
-            <Text fw={700}>{formatMoney(wallet.balanceCents, locale)}</Text>
+            <Text fw={700}>
+              {formatMoney(wallet.balanceCents, locale, wallet.currency)}
+            </Text>
           </Group>
         ))}
       </Stack>
@@ -242,7 +244,11 @@ function TransactionsPanel({ snapshot }: { snapshot: MoneySnapshot }) {
                   fw={700}
                 >
                   {transaction.type === 'INCOME' ? '+' : '-'}
-                  {formatMoney(transaction.amountCents, locale)}
+                  {formatMoney(
+                    transaction.amountCents,
+                    locale,
+                    transaction.wallet.currency
+                  )}
                 </Text>
               </Group>
             ))

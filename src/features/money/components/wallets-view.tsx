@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import {
+  Autocomplete,
   Badge,
   ColorInput,
   Group,
@@ -31,6 +32,37 @@ import type { MoneySnapshot, WalletRecord } from '@/shared/money-types';
 import { formatMoney } from '@/shared/money-utils';
 
 type MutationFormHandler = (event: FormEvent<HTMLFormElement>) => void;
+
+const currencyOptions = [
+  'USD',
+  'EUR',
+  'GBP',
+  'CHF',
+  'JPY',
+  'CNY',
+  'CAD',
+  'AUD',
+  'NZD',
+  'SEK',
+  'NOK',
+  'DKK',
+  'PLN',
+  'CZK',
+  'HUF',
+  'RON',
+  'BGN',
+  'TRY',
+  'ILS',
+  'AED',
+  'SAR',
+  'INR',
+  'SGD',
+  'HKD',
+  'KRW',
+  'BRL',
+  'MXN',
+  'ZAR'
+];
 
 export function WalletsList({ snapshot }: { snapshot: MoneySnapshot }) {
   const router = useRouter();
@@ -84,7 +116,9 @@ export function WalletsList({ snapshot }: { snapshot: MoneySnapshot }) {
             title: common('balance'),
             textAlign: 'right',
             render: (wallet) => (
-              <Text fw={700}>{formatMoney(wallet.balanceCents, locale)}</Text>
+              <Text fw={700}>
+                {formatMoney(wallet.balanceCents, locale, wallet.currency)}
+              </Text>
             )
           }
         ]}
@@ -137,10 +171,13 @@ export function WalletForm({
               defaultValue={wallet?.comment ?? ''}
               placeholder={wallets('commentPlaceholder')}
             />
-            <TextInput
+            <Autocomplete
+              data={currencyOptions}
               label={common('currency')}
               name="currency"
               defaultValue={wallet?.currency ?? 'USD'}
+              limit={8}
+              maxDropdownHeight={220}
               required
             />
             <ColorInput

@@ -13,10 +13,36 @@ export function waitForUiDelay() {
 }
 
 export function formatMoney(cents: number, locale = 'en', currency = 'USD') {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency
-  }).format(cents / 100);
+  const normalizedCurrency = currency.trim().toUpperCase();
+
+  if (isIntlCurrencyCode(normalizedCurrency)) {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: normalizedCurrency
+    }).format(cents / 100);
+  }
+
+  return `${new Intl.NumberFormat(locale).format(cents / 100)} ${normalizedCurrency}`;
+}
+
+function isIntlCurrencyCode(currency: string) {
+  const supportedValuesOf = (
+    Intl as typeof Intl & {
+      supportedValuesOf?: (key: 'currency') => string[];
+    }
+  ).supportedValuesOf;
+
+  if (supportedValuesOf) {
+    return supportedValuesOf('currency').includes(currency);
+  }
+
+  try {
+    new Intl.NumberFormat('en', { style: 'currency', currency });
+
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function formatDate(value: Date | string, locale = 'en') {

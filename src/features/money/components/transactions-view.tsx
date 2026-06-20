@@ -202,7 +202,11 @@ export function TransactionsList({ snapshot }: { snapshot: MoneySnapshot }) {
                 fw={700}
               >
                 {transaction.type === 'INCOME' ? '+' : '-'}
-                {formatMoney(transaction.amountCents, locale)}
+                {formatMoney(
+                  transaction.amountCents,
+                  locale,
+                  transaction.wallet.currency
+                )}
               </Text>
             )
           }
@@ -242,6 +246,14 @@ export function TransactionForm({
 }) {
   const common = useTranslations('Common');
   const transactions = useTranslations('Transactions');
+  const [selectedWalletId, setSelectedWalletId] = useState(
+    transaction.walletId
+  );
+  const selectedWalletCurrency = walletCurrency(wallets, selectedWalletId);
+
+  useEffect(() => {
+    setSelectedWalletId(transaction.walletId);
+  }, [transaction.walletId]);
 
   return (
     <FormCard
@@ -260,7 +272,7 @@ export function TransactionForm({
           <SimpleGrid cols={{ base: 1, sm: 2 }}>
             <TypeSelect defaultValue={transaction.type} />
             <NumberInput
-              label={common('amount')}
+              label={amountLabel(common('amount'), selectedWalletCurrency)}
               name="amount"
               defaultValue={transaction.amountCents / 100}
               min={0.01}
@@ -276,7 +288,8 @@ export function TransactionForm({
             <Select
               label={common('wallet')}
               hiddenInputProps={{ name: 'walletId' }}
-              defaultValue={transaction.walletId}
+              value={selectedWalletId}
+              onChange={(value) => setSelectedWalletId(value ?? '')}
               data={walletOptions(wallets, transaction.walletId)}
               required
             />
@@ -340,7 +353,9 @@ export function AddTransactionForm({
       initialMainCategoryId
     )
   );
+  const [selectedWalletId, setSelectedWalletId] = useState(defaultWalletId);
   const effectiveCategoryId = subcategoryId || mainCategoryId;
+  const selectedWalletCurrency = walletCurrency(wallets, selectedWalletId);
 
   useEffect(() => {
     if (!mainCategories.some((category) => category.id === mainCategoryId)) {
@@ -354,6 +369,12 @@ export function AddTransactionForm({
     }
   }, [subcategoryId, subcategories]);
 
+  useEffect(() => {
+    if (!wallets.some((wallet) => wallet.id === selectedWalletId)) {
+      setSelectedWalletId(defaultWalletId);
+    }
+  }, [defaultWalletId, selectedWalletId, wallets]);
+
   return (
     <FormCard isBusy={isSaving}>
       <form action="/api/transactions" method="post" onSubmit={onSubmit}>
@@ -361,7 +382,7 @@ export function AddTransactionForm({
           <SimpleGrid cols={{ base: 1, sm: 2 }}>
             <TypeSelect />
             <NumberInput
-              label={common('amount')}
+              label={amountLabel(common('amount'), selectedWalletCurrency)}
               name="amount"
               min={0.01}
               step={0.01}
@@ -377,7 +398,8 @@ export function AddTransactionForm({
             <Select
               label={common('wallet')}
               hiddenInputProps={{ name: 'walletId' }}
-              defaultValue={defaultWalletId}
+              value={selectedWalletId}
+              onChange={(value) => setSelectedWalletId(value ?? '')}
               data={wallets.map((wallet) => ({
                 value: wallet.id,
                 label: wallet.name
@@ -433,4 +455,12 @@ export function AddTransactionForm({
       </form>
     </FormCard>
   );
+}
+
+function walletCurrency(wallets: WalletRecord[], walletId: string) {
+  return wallets.find((wallet) => wallet.id === walletId)?.currency ?? 'USD';
+}
+
+function amountLabel(label: string, currency: string) {
+  return `${label} (${currency})`;
 }

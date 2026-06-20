@@ -72,7 +72,7 @@ export function parseCreateWalletInput(input: CreateWalletInput) {
   return {
     color: readOptionalString(data.color)?.trim() || '#059669',
     comment: readOptionalString(data.comment)?.trim() || null,
-    currency: readOptionalString(data.currency)?.trim() || 'USD',
+    currency: normalizeCurrency(readOptionalString(data.currency) || 'USD'),
     initialBalance:
       parseWithSchema(optionalNumberSchema, data.initialBalance) ?? 0,
     name: readRequiredString(data.name, 'name')
@@ -90,7 +90,11 @@ export function parseUpdateWalletInput(input: UpdateWalletInput) {
       ? { comment: readOptionalString(inputData.comment)?.trim() || null }
       : {}),
     ...(inputData.currency !== undefined
-      ? { currency: readRequiredString(inputData.currency, 'currency') }
+      ? {
+          currency: normalizeCurrency(
+            readRequiredString(inputData.currency, 'currency')
+          )
+        }
       : {}),
     ...(inputData.color !== undefined
       ? { color: readRequiredString(inputData.color, 'color') }
@@ -112,4 +116,8 @@ export function parseUpdateWalletInput(input: UpdateWalletInput) {
 
 export function parseWalletId(input: DeleteWalletInput) {
   return readRequiredString(input.id, 'id');
+}
+
+function normalizeCurrency(currency: string) {
+  return currency.trim().toUpperCase();
 }
