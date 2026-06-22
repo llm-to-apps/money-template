@@ -41,7 +41,7 @@ test.describe('database-backed local flows', () => {
 
     await page.goto('/wallets/new');
     await page.getByLabel('Name').fill(walletName);
-    await page.getByLabel('Currency').fill('USD');
+    await page.getByRole('combobox', { name: 'Currency' }).fill('USD');
     await page.getByLabel('Initial balance').fill('100');
     await page.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByText(walletName)).toBeVisible();

@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const e2ePort = process.env.RUN_DB_E2E === '1' ? 3006 : 3005;
+const e2ePort = Number(
+  process.env.MONEY_E2E_PORT ?? (process.env.RUN_DB_E2E === '1' ? 3006 : 3005)
+);
 
 export default defineConfig({
   testDir: './tests/e2e',
