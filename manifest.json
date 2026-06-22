@@ -28,7 +28,7 @@
       "preserve": ["node_modules", ".next"]
     }
   },
-  "image": "ghcr.io/llm-to-apps/money-template:sha-26dc3a9",
+  "image": "ghcr.io/llm-to-apps/money-template:sha-5e684de",
   "runtime": {
     "workdir": "/workspace",
     "appPort": 80,
