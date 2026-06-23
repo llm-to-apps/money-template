@@ -8,6 +8,22 @@
   "icon": "money",
   "status": "available",
   "sortOrder": 10,
+  "agent": {
+    "routing": [
+      "personal finance",
+      "income and expense tracking",
+      "wallets and balances",
+      "categories",
+      "monthly cash flow"
+    ],
+    "tasks": [
+      "record income and expenses",
+      "search transactions",
+      "summarize spending",
+      "manage wallets",
+      "manage categories"
+    ]
+  },
   "source": {
     "repository": "money-template",
     "remote": "git@github.com:llm-to-apps/money-template.git",
